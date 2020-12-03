@@ -8,6 +8,7 @@ authors = ["Luka Pečnik <lukapecnik96@gmail.com>"]
 python = "^3.8"
 PyQt5 = "^5.15.2"
 niaaml = "^0.1.2"
+NiaPy = "^2.0.0rc11"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
