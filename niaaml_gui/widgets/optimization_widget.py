@@ -2,27 +2,21 @@ from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayo
 from NiaPy.algorithms.utility import AlgorithmUtility
 from niaaml_gui.widgets.list_widget_custom import ListWidgetCustom
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
-
-arr1 = {
-    'Multi Layer Perceptron': 'MultiLayerPerceptron',
-    'Ada Boosting': 'AdaBoost'
-}
-
-arr2 = {
-    'Particle Swarm Optimization': 'ParticleSwarmOptimization',
-    'Select K Best': 'SelectKBest'
-}
-
-arr3 = {
-    'Normalizer': 'Normalizer',
-    'Standard Scaler': 'StandardScaler'
-}
+from niaaml.classifiers import ClassifierFactory
+from niaaml.preprocessing.feature_selection import FeatureSelectionAlgorithmFactory
+from niaaml.preprocessing.feature_transform import FeatureTransformAlgorithmFactory
 
 class OptimizationWidget(BaseMainWidget):
     __niapyAlgorithms = list(AlgorithmUtility().algorithm_classes.keys())
+    __niaamlFeatureSelectionAlgorithms = list(FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping().keys())
+    __niaamlFeatureTransformAlgorithms = list(FeatureTransformAlgorithmFactory().get_name_to_classname_mapping().keys())
+    __niaamlClassifiers = list(ClassifierFactory().get_name_to_classname_mapping().keys())
 
     def __init__(self, parent, *args, **kwargs):
         self.__niapyAlgorithms.sort()
+        self.__niaamlFeatureSelectionAlgorithms.sort()
+        self.__niaamlFeatureTransformAlgorithms.sort()
+        self.__niaamlClassifiers.sort()
         super().__init__(parent, *args, **kwargs)
 
         selectFileBar = QHBoxLayout(self._parent)
@@ -144,15 +138,15 @@ class OptimizationWidget(BaseMainWidget):
     def __createTabs(self, fsasList, ftasList, classifiersList):
         tabs = QTabWidget(self._parent)
 
-        fsas = self.__createListWidget(arr2, fsasList)
+        fsas = self.__createListWidget(self.__niaamlFeatureSelectionAlgorithms, fsasList)
         fsasList.setTarget(fsas)
         tabs.addTab(fsas, 'Feature Selection Algorithms')
 
-        ftas = self.__createListWidget(arr3, ftasList)
+        ftas = self.__createListWidget(self.__niaamlFeatureTransformAlgorithms, ftasList)
         ftasList.setTarget(ftas)
         tabs.addTab(ftas, 'Feature Selection Algorithms')
 
-        clas = self.__createListWidget(arr1, classifiersList)
+        clas = self.__createListWidget(self.__niaamlClassifiers, classifiersList)
         classifiersList.setTarget(clas)
         tabs.addTab(clas, 'Classifiers')
 

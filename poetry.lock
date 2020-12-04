@@ -113,20 +113,21 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "niaaml"
-version = "0.1.2"
+version = "0.1.3"
 description = "Python automated machine learning framework."
 category = "main"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
+matplotlib = ">=3.3.3,<4.0.0"
 NiaPy = ">=2.0.0rc11,<3.0.0"
 numpy = ">=1.19.1,<2.0.0"
 scikit-learn = ">=0.23.2,<0.24.0"
 
 [[package]]
 name = "niapy"
-version = "2.0.0rc11"
+version = "2.0.0rc12"
 description = " Python micro framework for building nature-inspired algorithms."
 category = "main"
 optional = false
@@ -347,7 +348,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "dc3d588efea7f6cd85d9a5e43def5fb2ac6293fb7df0ed11720ee891006b9f10"
+content-hash = "88731626b92e7cd2729ae7468d861a8a4680ccbd791f255c74b03feead22cff9"
 
 [metadata.files]
 atomicwrites = [
@@ -451,12 +452,12 @@ more-itertools = [
     {file = "more_itertools-8.6.0-py3-none-any.whl", hash = "sha256:8e1a2a43b2f2727425f2b5839587ae37093f19153dc26c0927d1048ff6557330"},
 ]
 niaaml = [
-    {file = "NiaAML-0.1.2-py3-none-any.whl", hash = "sha256:e8dfd68529ec38c45911a73eeae587a2275bc391c76a92941ed814ebeb1072c1"},
-    {file = "NiaAML-0.1.2.tar.gz", hash = "sha256:59c81dafb0328896aa3bae3390f43428eeea107d53ca88792c2c19184dbcad52"},
+    {file = "NiaAML-0.1.3-py3-none-any.whl", hash = "sha256:8eaed64e18ef314c99ab9ad6cce3900d08be2863877c50641abe7afdbeb20511"},
+    {file = "NiaAML-0.1.3.tar.gz", hash = "sha256:ed2461e5e57d88f0aaedbed19684a79a0173deca73c46a1a9d6784f893f700c7"},
 ]
 niapy = [
-    {file = "NiaPy-2.0.0rc11-py3-none-any.whl", hash = "sha256:399dde08bf7a0f9c7658dac258942c923d3fa44f25299d9dfe5a9dfea60d0c82"},
-    {file = "NiaPy-2.0.0rc11.tar.gz", hash = "sha256:fd17f76beb0edbe511136a13fcf5a3cff9b27c59162f20b0e11d75688121be97"},
+    {file = "NiaPy-2.0.0rc12-py3-none-any.whl", hash = "sha256:4a1fd142e7f64ab32f13134e9115682fde13989adad87f02487ba6f1c14dc034"},
+    {file = "NiaPy-2.0.0rc12.tar.gz", hash = "sha256:41ec94b92572ac1a6b20018192f4e29c842a7f743af62488c123e5ca48e12374"},
 ]
 numpy = [
     {file = "numpy-1.19.4-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:e9b30d4bd69498fc0c3fe9db5f62fffbb06b8eb9321f92cc970f2969be5e3949"},
