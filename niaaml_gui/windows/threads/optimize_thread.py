@@ -12,7 +12,7 @@ class OptimizeThread(QtCore.QThread):
         self.__data = data
     
     def run(self):
-        dataReader = CSVDataReader(src=self.__data.csvSrc)
+        dataReader = CSVDataReader(src=self.__data.csvSrc, has_header=self.__data.csvHasHeader)
         optimizer = PipelineOptimizer(
             data=dataReader,
             feature_selection_algorithms=self.__data.fsas,

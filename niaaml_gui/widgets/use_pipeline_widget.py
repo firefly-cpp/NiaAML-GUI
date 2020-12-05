@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QFileDialog, QLineEdit, QHBoxLayout, QVBoxLayout, QWidget, QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QLineEdit, QHBoxLayout, QVBoxLayout, QWidget, QFileDialog, QCheckBox
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
 from niaaml_gui.windows import ProcessWindow
 from niaaml_gui.process_window_data import ProcessWindowData
@@ -23,8 +23,12 @@ class UsePipelineWidget(BaseMainWidget):
         selectPPLNFileBar.addWidget(fNameLine1)
         selectPPLNFileBar.addWidget(self._createButton('Select file', self.__openPPLNFile))
 
+
+        fileLayout = QHBoxLayout(self._parent)
+
         selectFileBar = QHBoxLayout(self._parent)
         selectFileBar.setSpacing(0)
+        selectFileBar.setContentsMargins(0, 0, 5, 0)
         fNameLine = QLineEdit(self._parent)
         fNameLine.setObjectName('csvFile')
         fNameLine.setPlaceholderText('Select a CSV file with features...')
@@ -33,12 +37,19 @@ class UsePipelineWidget(BaseMainWidget):
         selectFileBar.addWidget(fNameLine)
         selectFileBar.addWidget(self._createButton('Select file', self._openCSVFile))
 
+        checkBox = QCheckBox('CSV has header')
+        checkBox.setObjectName('csv')
+        checkBox.setFont(font)
+
+        fileLayout.addItem(selectFileBar)
+        fileLayout.addWidget(checkBox)
+
         confirmBar = QHBoxLayout(self._parent)
         confirmBar.addStretch()
         confirmBar.addWidget(self._createButton('Run', self.__runPipeline))
 
         vBoxLayout.addItem(selectPPLNFileBar)
-        vBoxLayout.addItem(selectFileBar)
+        vBoxLayout.addItem(fileLayout)
         vBoxLayout.addItem(confirmBar)
 
         self.setLayout(vBoxLayout)
@@ -68,6 +79,7 @@ class UsePipelineWidget(BaseMainWidget):
             ProcessWindowData(
                 False,
                 csvSrc=csvSrc,
+                csvHasHeader=self.findChild(QCheckBox, 'csv').isChecked(),
                 pipelineSrc=pplnSrc
                 )
             )

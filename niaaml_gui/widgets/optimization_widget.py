@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget, QFileDialog
+from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget, QFileDialog, QCheckBox
 from NiaPy.algorithms.utility import AlgorithmUtility
 from niaaml_gui.widgets.list_widget_custom import ListWidgetCustom
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
@@ -27,6 +27,8 @@ class OptimizationWidget(BaseMainWidget):
         self.__niaamlClassifiersList.sort()
         super().__init__(parent, *args, **kwargs)
 
+        fileLayout = QHBoxLayout(self._parent)
+
         selectFileBar = QHBoxLayout(self._parent)
         selectFileBar.setSpacing(0)
         selectFileBar.setContentsMargins(0, 5, 5, 5)
@@ -39,6 +41,13 @@ class OptimizationWidget(BaseMainWidget):
         fNameLine.setFont(font)
         selectFileBar.addWidget(fNameLine)
         selectFileBar.addWidget(self._createButton('Select file', self._openCSVFile))
+
+        checkBox = QCheckBox('CSV has header')
+        checkBox.setObjectName('csv')
+        checkBox.setFont(font)
+
+        fileLayout.addItem(selectFileBar)
+        fileLayout.addWidget(checkBox)
 
         hBoxLayout = QHBoxLayout(self._parent)
         hBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -101,7 +110,7 @@ class OptimizationWidget(BaseMainWidget):
         confirmBar.addStretch()
         confirmBar.addWidget(self._createButton('Start optimization', self.__runOptimize))
 
-        vBoxLayout.addItem(selectFileBar)
+        vBoxLayout.addItem(fileLayout)
         vBoxLayout.addItem(h1BoxLayout)
         vBoxLayout.addItem(settingsBox)
         vBoxLayout.addItem(confirmBar)
@@ -258,6 +267,7 @@ class OptimizationWidget(BaseMainWidget):
             ProcessWindowData(
                 True,
                 csvSrc,
+                self.findChild(QCheckBox, 'csv').isChecked(),
                 optAlgName,
                 optAlgInnerName,
                 popSize,

@@ -3,6 +3,7 @@ class ProcessWindowData:
         self,
         isOptimization,
         csvSrc = None,
+        csvHasHeader = None,
         optAlgName = None,
         optAlgInnerName = None,
         popSize = None,
@@ -17,6 +18,7 @@ class ProcessWindowData:
         pipelineSrc = None):
         self.isOptimization = isOptimization
         self.csvSrc = csvSrc
+        self.csvHasHeader = csvHasHeader
         self.optAlgName = optAlgName
         self.optAlgInnerName = optAlgInnerName
         self.popSize = popSize
