@@ -113,14 +113,13 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "niaaml"
-version = "0.1.3"
+version = "0.1.4"
 description = "Python automated machine learning framework."
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 
 [package.dependencies]
-matplotlib = ">=3.3.3,<4.0.0"
 NiaPy = ">=2.0.0rc11,<3.0.0"
 numpy = ">=1.19.1,<2.0.0"
 scikit-learn = ">=0.23.2,<0.24.0"
@@ -452,8 +451,8 @@ more-itertools = [
     {file = "more_itertools-8.6.0-py3-none-any.whl", hash = "sha256:8e1a2a43b2f2727425f2b5839587ae37093f19153dc26c0927d1048ff6557330"},
 ]
 niaaml = [
-    {file = "NiaAML-0.1.3-py3-none-any.whl", hash = "sha256:8eaed64e18ef314c99ab9ad6cce3900d08be2863877c50641abe7afdbeb20511"},
-    {file = "NiaAML-0.1.3.tar.gz", hash = "sha256:ed2461e5e57d88f0aaedbed19684a79a0173deca73c46a1a9d6784f893f700c7"},
+    {file = "NiaAML-0.1.4-py3-none-any.whl", hash = "sha256:11c76581ba56ad01d75fe6c3b01da5b2adab8837105aa7a05ed7e76ffc464f41"},
+    {file = "NiaAML-0.1.4.tar.gz", hash = "sha256:94fbbd85a7c871ec5d088afc1b7d2992b37a247d0ec889f314ecdd1d6e3df1a1"},
 ]
 niapy = [
     {file = "NiaPy-2.0.0rc12-py3-none-any.whl", hash = "sha256:4a1fd142e7f64ab32f13134e9115682fde13989adad87f02487ba6f1c14dc034"},

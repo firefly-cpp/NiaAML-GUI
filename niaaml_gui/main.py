@@ -4,10 +4,10 @@ from PyQt5.QtWidgets import qApp, QMainWindow, QMessageBox, QAction
 from PyQt5.QtCore import QSize
 from niaaml_gui.widgets import OptimizationWidget, UsePipelineWidget
 
-class HelloWindow(QMainWindow):
+class MainAppWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
-        self.setMinimumSize(QSize(640, 480))
+        self.setMinimumSize(QSize(1024, 768))
         self.setWindowTitle('NiaAML - GUI')
 
         menuBar = self.menuBar()
@@ -40,6 +40,6 @@ class HelloWindow(QMainWindow):
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
-    mainWin = HelloWindow()
+    mainWin = MainAppWindow()
     mainWin.show()
     sys.exit(app.exec_())

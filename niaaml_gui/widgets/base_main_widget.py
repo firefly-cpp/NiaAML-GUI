@@ -4,6 +4,7 @@ class BaseMainWidget(QWidget):
     def __init__(self, parent, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         self._parent = parent
+        self._processWindow = None
 
     def _createButton(self, text, callback = None):
         btn = QPushButton(self._parent)

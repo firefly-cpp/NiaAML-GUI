@@ -1,6 +1,8 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QFileDialog, QLineEdit, QHBoxLayout, QVBoxLayout, QWidget, QFileDialog
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
+from niaaml_gui.windows import ProcessWindow
+from niaaml_gui.process_window_data import ProcessWindowData
 
 class UsePipelineWidget(BaseMainWidget):
     def __init__(self, parent, *args, **kwargs):
@@ -59,5 +61,14 @@ class UsePipelineWidget(BaseMainWidget):
         if not self._isNoneOrWhiteSpace(err):
             self._parent.errorMessage.setText(err)
             self._parent.errorMessage.show()
-        
-        # TODO run
+            return
+
+        self._processWindow = ProcessWindow(
+            self._parent,
+            ProcessWindowData(
+                False,
+                csvSrc=csvSrc,
+                pipelineSrc=pplnSrc
+                )
+            )
+        self._processWindow.show()

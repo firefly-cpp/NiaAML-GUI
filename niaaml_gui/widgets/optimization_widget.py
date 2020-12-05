@@ -1,22 +1,30 @@
-from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget
+from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget, QFileDialog
 from NiaPy.algorithms.utility import AlgorithmUtility
 from niaaml_gui.widgets.list_widget_custom import ListWidgetCustom
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
+from niaaml_gui.windows import ProcessWindow
+from niaaml_gui.process_window_data import ProcessWindowData
 from niaaml.classifiers import ClassifierFactory
 from niaaml.preprocessing.feature_selection import FeatureSelectionAlgorithmFactory
 from niaaml.preprocessing.feature_transform import FeatureTransformAlgorithmFactory
+from niaaml.fitness import FitnessFactory
 
 class OptimizationWidget(BaseMainWidget):
-    __niapyAlgorithms = list(AlgorithmUtility().algorithm_classes.keys())
-    __niaamlFeatureSelectionAlgorithms = list(FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping().keys())
-    __niaamlFeatureTransformAlgorithms = list(FeatureTransformAlgorithmFactory().get_name_to_classname_mapping().keys())
-    __niaamlClassifiers = list(ClassifierFactory().get_name_to_classname_mapping().keys())
+    __niaamlFeatureSelectionAlgorithms = FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping()
+    __niaamlFeatureTransformAlgorithms = FeatureTransformAlgorithmFactory().get_name_to_classname_mapping()
+    __niaamlClassifiers = ClassifierFactory().get_name_to_classname_mapping()
+    __niaamlFitnessFunctions = FitnessFactory().get_name_to_classname_mapping()
+    __niapyAlgorithmsList = list(AlgorithmUtility().algorithm_classes.keys())
+    __niaamlFeatureSelectionAlgorithmsList = list(__niaamlFeatureSelectionAlgorithms.keys())
+    __niaamlFeatureTransformAlgorithmsList = list(__niaamlFeatureTransformAlgorithms.keys())
+    __niaamlClassifiersList = list(__niaamlClassifiers.keys())
+    __niaamlFitnessFunctionsList = list(__niaamlFitnessFunctions.keys())
 
     def __init__(self, parent, *args, **kwargs):
-        self.__niapyAlgorithms.sort()
-        self.__niaamlFeatureSelectionAlgorithms.sort()
-        self.__niaamlFeatureTransformAlgorithms.sort()
-        self.__niaamlClassifiers.sort()
+        self.__niapyAlgorithmsList.sort()
+        self.__niaamlFeatureSelectionAlgorithmsList.sort()
+        self.__niaamlFeatureTransformAlgorithmsList.sort()
+        self.__niaamlClassifiersList.sort()
         super().__init__(parent, *args, **kwargs)
 
         selectFileBar = QHBoxLayout(self._parent)
@@ -59,12 +67,25 @@ class OptimizationWidget(BaseMainWidget):
         settingsBox = self.__createGridLayoutBox((0, 0, 5, 5), False, 'transparent')
         settingsBox.setVerticalSpacing(10)
 
-        optAlgos = self.__createComboBox('Optimization Algorithm (components selection):', self.__niapyAlgorithms, 'optAlgos')
-        optAlgosInner = self.__createComboBox('Optimization Algorithm (parameter tuning) - same as first if not selected:', [*['None'], *self.__niapyAlgorithms], 'optAlgosInner')
+        optAlgos = self.__createComboBox('Optimization Algorithm (components selection):', self.__niapyAlgorithmsList, 'optAlgos')
+        optAlgosInner = self.__createComboBox('Optimization Algorithm (parameter tuning) - same as first if not selected:', [*['None'], *self.__niapyAlgorithmsList], 'optAlgosInner')
         popSize = self.__createTextInput('Population size (components selection):', 'popSize')
         popSizeInner = self.__createTextInput('Population size (parameter tuning):', 'popSizeInner')
         numEvals = self.__createTextInput('Number of evaluations (components selection):', 'numEvals')
         numEvalsInner = self.__createTextInput('Number of evaluations (parameter tuning):', 'numEvalsInner')
+        fitFuncs = self.__createComboBox('Fitness Function:', self.__niaamlFitnessFunctionsList, 'fitFuncs')
+
+        selectOutputFolderBar = QHBoxLayout(self._parent)
+        selectOutputFolderBar.setSpacing(0)
+        foNameLine = QLineEdit(self._parent)
+        foNameLine.setObjectName('outputFolder')
+        foNameLine.setPlaceholderText('Select pipeline output folder...')
+        foNameLine.setReadOnly(True)
+        font = foNameLine.font()
+        font.setPointSize(12)
+        foNameLine.setFont(font)
+        selectOutputFolderBar.addWidget(foNameLine)
+        selectOutputFolderBar.addWidget(self._createButton('Select folder', self.__selectDirectory))
 
         settingsBox.addItem(optAlgos)
         settingsBox.addItem(optAlgosInner)
@@ -72,6 +93,8 @@ class OptimizationWidget(BaseMainWidget):
         settingsBox.addItem(popSizeInner)
         settingsBox.addItem(numEvals)
         settingsBox.addItem(numEvalsInner)
+        settingsBox.addItem(fitFuncs)
+        settingsBox.addItem(selectOutputFolderBar)
 
         confirmBar = QHBoxLayout(self._parent)
         confirmBar.setContentsMargins(5, 5, 5, 5)
@@ -138,15 +161,15 @@ class OptimizationWidget(BaseMainWidget):
     def __createTabs(self, fsasList, ftasList, classifiersList):
         tabs = QTabWidget(self._parent)
 
-        fsas = self.__createListWidget(self.__niaamlFeatureSelectionAlgorithms, fsasList)
+        fsas = self.__createListWidget(self.__niaamlFeatureSelectionAlgorithmsList, fsasList)
         fsasList.setTarget(fsas)
         tabs.addTab(fsas, 'Feature Selection Algorithms')
 
-        ftas = self.__createListWidget(self.__niaamlFeatureTransformAlgorithms, ftasList)
+        ftas = self.__createListWidget(self.__niaamlFeatureTransformAlgorithmsList, ftasList)
         ftasList.setTarget(ftas)
         tabs.addTab(ftas, 'Feature Selection Algorithms')
 
-        clas = self.__createListWidget(self.__niaamlClassifiers, classifiersList)
+        clas = self.__createListWidget(self.__niaamlClassifiersList, classifiersList)
         classifiersList.setTarget(clas)
         tabs.addTab(clas, 'Classifiers')
 
@@ -155,6 +178,10 @@ class OptimizationWidget(BaseMainWidget):
         tabs.setFont(font)
         tabs.setStyleSheet("QTabBar::tab { height: 40px; }")
         return tabs
+    
+    def __selectDirectory(self):
+        fname = str(QFileDialog.getExistingDirectory(parent=self._parent, caption='Select Directory'))
+        self.findChild(QLineEdit, 'outputFolder').setText(fname)
     
     def __runOptimize(self):
         err = ''
@@ -205,18 +232,43 @@ class OptimizationWidget(BaseMainWidget):
                 err += 'Invalid number of inner evaluations.\n'
         
         fsasList = self.findChild(ListWidgetCustom, 'fsasList')
-        fsas = [fsasList.item(i).text() for i in range(fsasList.count())]
+        fsas = [self.__niaamlFeatureSelectionAlgorithms[fsasList.item(i).text()] for i in range(fsasList.count())]
 
         ftasList = self.findChild(ListWidgetCustom, 'ftasList')
-        ftas = [ftasList.item(i).text() for i in range(ftasList.count())]
+        ftas = [self.__niaamlFeatureTransformAlgorithms[ftasList.item(i).text()] for i in range(ftasList.count())]
 
         clsList = self.findChild(ListWidgetCustom, 'classifiersList')
-        classifiers = [clsList.item(i).text() for i in range(clsList.count())]
+        classifiers = [self.__niaamlClassifiers[clsList.item(i).text()] for i in range(clsList.count())]
         if len(classifiers) == 0:
             err += 'Select at least one classifier.\n'
+        
+        fitnessFunctionName = self.__niaamlFitnessFunctions[str(self.findChild(QComboBox, 'fitFuncs').currentText())]
+
+        outputFolder = self.findChild(QLineEdit, 'outputFolder').text()
+        if self._isNoneOrWhiteSpace(outputFolder):
+            err += 'Select an output directory.\n'
         
         if not self._isNoneOrWhiteSpace(err):
             self._parent.errorMessage.setText(err)
             self._parent.errorMessage.show()
+            return
         
-        # TODO optimization
+        self._processWindow = ProcessWindow(
+            self._parent,
+            ProcessWindowData(
+                True,
+                csvSrc,
+                optAlgName,
+                optAlgInnerName,
+                popSize,
+                popSizeInner,
+                numEvals,
+                numEvalsInner,
+                fsas,
+                ftas,
+                classifiers,
+                fitnessFunctionName,
+                outputFolder
+                )
+            )
+        self._processWindow.show()
