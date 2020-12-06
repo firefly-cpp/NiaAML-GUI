@@ -4,6 +4,7 @@ class ProcessWindowData:
         isOptimization,
         csvSrc = None,
         csvHasHeader = None,
+        encoder = None,
         optAlgName = None,
         optAlgInnerName = None,
         popSize = None,
@@ -19,6 +20,7 @@ class ProcessWindowData:
         self.isOptimization = isOptimization
         self.csvSrc = csvSrc
         self.csvHasHeader = csvHasHeader
+        self.encoder = encoder
         self.optAlgName = optAlgName
         self.optAlgInnerName = optAlgInnerName
         self.popSize = popSize

@@ -8,17 +8,20 @@ from niaaml.classifiers import ClassifierFactory
 from niaaml.preprocessing.feature_selection import FeatureSelectionAlgorithmFactory
 from niaaml.preprocessing.feature_transform import FeatureTransformAlgorithmFactory
 from niaaml.fitness import FitnessFactory
+from niaaml.preprocessing.encoding import EncoderFactory
 
 class OptimizationWidget(BaseMainWidget):
     __niaamlFeatureSelectionAlgorithms = FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping()
     __niaamlFeatureTransformAlgorithms = FeatureTransformAlgorithmFactory().get_name_to_classname_mapping()
     __niaamlClassifiers = ClassifierFactory().get_name_to_classname_mapping()
     __niaamlFitnessFunctions = FitnessFactory().get_name_to_classname_mapping()
+    __niaamlEncoders = EncoderFactory().get_name_to_classname_mapping()
     __niapyAlgorithmsList = list(AlgorithmUtility().algorithm_classes.keys())
     __niaamlFeatureSelectionAlgorithmsList = list(__niaamlFeatureSelectionAlgorithms.keys())
     __niaamlFeatureTransformAlgorithmsList = list(__niaamlFeatureTransformAlgorithms.keys())
     __niaamlClassifiersList = list(__niaamlClassifiers.keys())
     __niaamlFitnessFunctionsList = list(__niaamlFitnessFunctions.keys())
+    __niaamlEncodersList = list(__niaamlEncoders.keys())
 
     def __init__(self, parent, *args, **kwargs):
         self.__niapyAlgorithmsList.sort()
@@ -48,6 +51,8 @@ class OptimizationWidget(BaseMainWidget):
 
         fileLayout.addItem(selectFileBar)
         fileLayout.addWidget(checkBox)
+
+        encoders = self.__createComboBox('Categorical features encoder:', self.__niaamlEncodersList, 'encoders')
 
         hBoxLayout = QHBoxLayout(self._parent)
         hBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -111,6 +116,7 @@ class OptimizationWidget(BaseMainWidget):
         confirmBar.addWidget(self._createButton('Start optimization', self.__runOptimize))
 
         vBoxLayout.addItem(fileLayout)
+        vBoxLayout.addItem(encoders)
         vBoxLayout.addItem(h1BoxLayout)
         vBoxLayout.addItem(settingsBox)
         vBoxLayout.addItem(confirmBar)
@@ -198,6 +204,8 @@ class OptimizationWidget(BaseMainWidget):
         csvSrc = self.findChild(QLineEdit, 'csvFile').text()
         if self._isNoneOrWhiteSpace(csvSrc):
             err += 'Select CSV dataset file.\n'
+        
+        encoderName = self.__niaamlEncoders[str(self.findChild(QComboBox, 'encoders').currentText())]
 
         optAlgName = str(self.findChild(QComboBox, 'optAlgos').currentText())
         optAlgInnerName = str(self.findChild(QComboBox, 'optAlgosInner').currentText())
@@ -268,6 +276,7 @@ class OptimizationWidget(BaseMainWidget):
                 True,
                 csvSrc,
                 self.findChild(QCheckBox, 'csv').isChecked(),
+                encoderName,
                 optAlgName,
                 optAlgInnerName,
                 popSize,

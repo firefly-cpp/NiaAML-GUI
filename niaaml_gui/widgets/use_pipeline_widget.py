@@ -23,7 +23,6 @@ class UsePipelineWidget(BaseMainWidget):
         selectPPLNFileBar.addWidget(fNameLine1)
         selectPPLNFileBar.addWidget(self._createButton('Select file', self.__openPPLNFile))
 
-
         fileLayout = QHBoxLayout(self._parent)
 
         selectFileBar = QHBoxLayout(self._parent)
