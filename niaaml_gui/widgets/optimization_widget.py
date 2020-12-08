@@ -9,6 +9,7 @@ from niaaml.preprocessing.feature_selection import FeatureSelectionAlgorithmFact
 from niaaml.preprocessing.feature_transform import FeatureTransformAlgorithmFactory
 from niaaml.fitness import FitnessFactory
 from niaaml.preprocessing.encoding import EncoderFactory
+from niaaml.preprocessing.imputation import ImputerFactory
 
 class OptimizationWidget(BaseMainWidget):
     __niaamlFeatureSelectionAlgorithms = FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping()
@@ -16,12 +17,14 @@ class OptimizationWidget(BaseMainWidget):
     __niaamlClassifiers = ClassifierFactory().get_name_to_classname_mapping()
     __niaamlFitnessFunctions = FitnessFactory().get_name_to_classname_mapping()
     __niaamlEncoders = EncoderFactory().get_name_to_classname_mapping()
+    __niaamlImputers = ImputerFactory().get_name_to_classname_mapping()
     __niapyAlgorithmsList = list(AlgorithmUtility().algorithm_classes.keys())
     __niaamlFeatureSelectionAlgorithmsList = list(__niaamlFeatureSelectionAlgorithms.keys())
     __niaamlFeatureTransformAlgorithmsList = list(__niaamlFeatureTransformAlgorithms.keys())
     __niaamlClassifiersList = list(__niaamlClassifiers.keys())
     __niaamlFitnessFunctionsList = list(__niaamlFitnessFunctions.keys())
     __niaamlEncodersList = list(__niaamlEncoders.keys())
+    __niaamlImputersList = list(__niaamlImputers.keys())
 
     def __init__(self, parent, *args, **kwargs):
         self.__niapyAlgorithmsList.sort()
@@ -52,7 +55,8 @@ class OptimizationWidget(BaseMainWidget):
         fileLayout.addItem(selectFileBar)
         fileLayout.addWidget(checkBox)
 
-        encoders = self.__createComboBox('Categorical features encoder:', self.__niaamlEncodersList, 'encoders')
+        encoders = self.__createComboBox('Categorical features\' encoder:', self.__niaamlEncodersList, 'encoders')
+        imputers = self.__createComboBox('Missing features\' imputer:', self.__niaamlImputersList, 'imputers')
 
         hBoxLayout = QHBoxLayout(self._parent)
         hBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -117,6 +121,7 @@ class OptimizationWidget(BaseMainWidget):
 
         vBoxLayout.addItem(fileLayout)
         vBoxLayout.addItem(encoders)
+        vBoxLayout.addItem(imputers)
         vBoxLayout.addItem(h1BoxLayout)
         vBoxLayout.addItem(settingsBox)
         vBoxLayout.addItem(confirmBar)
@@ -206,6 +211,7 @@ class OptimizationWidget(BaseMainWidget):
             err += 'Select CSV dataset file.\n'
         
         encoderName = self.__niaamlEncoders[str(self.findChild(QComboBox, 'encoders').currentText())]
+        imputerName = self.__niaamlImputers[str(self.findChild(QComboBox, 'imputers').currentText())]
 
         optAlgName = str(self.findChild(QComboBox, 'optAlgos').currentText())
         optAlgInnerName = str(self.findChild(QComboBox, 'optAlgosInner').currentText())
@@ -277,6 +283,7 @@ class OptimizationWidget(BaseMainWidget):
                 csvSrc,
                 self.findChild(QCheckBox, 'csv').isChecked(),
                 encoderName,
+                imputerName,
                 optAlgName,
                 optAlgInnerName,
                 popSize,
