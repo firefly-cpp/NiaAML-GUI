@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget, QFileDialog, QCheckBox, QPushButton
 from PyQt5 import QtGui
 from PyQt5.QtGui import QIcon
+from PyQt5 import QtCore
 from NiaPy.algorithms.utility import AlgorithmUtility
 from niaaml_gui.widgets.list_widget_custom import ListWidgetCustom
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
@@ -93,10 +94,13 @@ class OptimizationWidget(BaseMainWidget):
 
         optAlgos = self.__createComboBox('Optimization Algorithm (components selection):', self.__niapyAlgorithmsList, 'optAlgos')
         optAlgosInner = self.__createComboBox('Optimization Algorithm (parameter tuning) - same as first if not selected:', [*['None'], *self.__niapyAlgorithmsList], 'optAlgosInner')
-        popSize = self.__createTextInput('Population size (components selection):', 'popSize')
-        popSizeInner = self.__createTextInput('Population size (parameter tuning):', 'popSizeInner')
-        numEvals = self.__createTextInput('Number of evaluations (components selection):', 'numEvals')
-        numEvalsInner = self.__createTextInput('Number of evaluations (parameter tuning):', 'numEvalsInner')
+
+        validator = QtGui.QRegExpValidator(QtCore.QRegExp('[1-9][0-9]*'))
+        popSize = self.__createTextInput('Population size (components selection):', 'popSize', validator)
+        popSizeInner = self.__createTextInput('Population size (parameter tuning):', 'popSizeInner', validator)
+        numEvals = self.__createTextInput('Number of evaluations (components selection):', 'numEvals', validator)
+        numEvalsInner = self.__createTextInput('Number of evaluations (parameter tuning):', 'numEvalsInner', validator)
+
         fitFuncs = self.__createComboBox('Fitness Function:', self.__niaamlFitnessFunctionsList, 'fitFuncs')
 
         selectOutputFolderBar = QHBoxLayout(self._parent)
@@ -158,7 +162,7 @@ class OptimizationWidget(BaseMainWidget):
         comboBox.addWidget(cb)
         return comboBox
     
-    def __createTextInput(self, label, name):
+    def __createTextInput(self, label, name, validator=None):
         textBox = QVBoxLayout()
         textBox.setSpacing(5)
         label = QLabel(label, self._parent)
@@ -170,6 +174,10 @@ class OptimizationWidget(BaseMainWidget):
         tb.setFont(font)
         textBox.addWidget(label)
         textBox.addWidget(tb)
+
+        if validator is not None:
+            tb.setValidator(validator)
+
         return textBox
 
     def __createGridLayoutBox(self, tupleMargins, visibleBorder, background_color = '#fff'):
