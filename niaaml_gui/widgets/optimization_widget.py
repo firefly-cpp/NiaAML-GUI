@@ -1,4 +1,6 @@
-from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget, QFileDialog, QCheckBox
+from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget, QFileDialog, QCheckBox, QPushButton
+from PyQt5 import QtGui
+from PyQt5.QtGui import QIcon
 from NiaPy.algorithms.utility import AlgorithmUtility
 from niaaml_gui.widgets.list_widget_custom import ListWidgetCustom
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
@@ -10,6 +12,7 @@ from niaaml.preprocessing.feature_transform import FeatureTransformAlgorithmFact
 from niaaml.fitness import FitnessFactory
 from niaaml.preprocessing.encoding import EncoderFactory
 from niaaml.preprocessing.imputation import ImputerFactory
+import qtawesome as qta
 
 class OptimizationWidget(BaseMainWidget):
     __niaamlFeatureSelectionAlgorithms = FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping()
@@ -46,6 +49,9 @@ class OptimizationWidget(BaseMainWidget):
         font.setPointSize(12)
         fNameLine.setFont(font)
         selectFileBar.addWidget(fNameLine)
+        editBtn = self._createButton(None, self._editCSVFile, 'editCSVButton', qta.icon('fa5.edit'))
+        editBtn.setEnabled(False)
+        selectFileBar.addWidget(editBtn)
         selectFileBar.addWidget(self._createButton('Select file', self._openCSVFile))
 
         checkBox = QCheckBox('CSV has header')

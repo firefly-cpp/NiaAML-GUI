@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QFileDialog, QLineEdit, QHBoxLayout, QVBoxLayout, QW
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
 from niaaml_gui.windows import ProcessWindow
 from niaaml_gui.process_window_data import ProcessWindowData
+import qtawesome as qta
 
 class UsePipelineWidget(BaseMainWidget):
     def __init__(self, parent, *args, **kwargs):
@@ -34,6 +35,9 @@ class UsePipelineWidget(BaseMainWidget):
         fNameLine.setReadOnly(True)
         fNameLine.setFont(font)
         selectFileBar.addWidget(fNameLine)
+        editBtn = self._createButton(None, self._editCSVFile, 'editCSVButton', qta.icon('fa5.edit'))
+        editBtn.setEnabled(False)
+        selectFileBar.addWidget(editBtn)
         selectFileBar.addWidget(self._createButton('Select file', self._openCSVFile))
 
         checkBox = QCheckBox('CSV has header')
