@@ -2,7 +2,7 @@
 
 This is a basic graphical user interface intended for users of the [NiaAML](https://github.com/lukapecnik/NiaAML) Python package.
 
-* **Python versions:** 3.8.x
+* **Python versions:** 3.7.x, 3.8.x
 
 ## Installation
 
