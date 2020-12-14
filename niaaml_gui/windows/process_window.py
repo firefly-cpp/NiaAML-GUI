@@ -39,12 +39,18 @@ class ProcessWindow(QMainWindow):
         self.__data = copy.deepcopy(data)
 
         if self.__data.isOptimization:
+            self.__progressBar.setMaximum(100)
+            self.__currentEvals = 0
+            self.__totalEvals = data.numEvals * data.numEvalsInner
             optimizer = OptimizeThread(self.__data)
             optimizer.optimized.connect(self.onOptimizationComplete)
+            optimizer.progress.connect(self.onOptimizationProgress)
             self.__runningThread = optimizer
             optimizer.start()
             self.__textArea.appendPlainText('Pipeline optimization running...\n')
         else:
+            self.__progressBar.setMaximum(0)
+            self.__progressBar.setTextVisible(False)
             runner = RunThread(self.__data)
             runner.ran.connect(self.onRunComplete)
             self.__runningThread = runner
@@ -59,12 +65,17 @@ class ProcessWindow(QMainWindow):
             return
     
     def onOptimizationComplete(self, data):
-        self.__progressBar.setMaximum(100)
         self.__progressBar.setValue(100)
         self.__textArea.appendPlainText(data + '\n')
         self.__textArea.appendPlainText('Pipeline optimization complete.')
         self.__textArea.appendPlainText('Results exported to: ' + self.__data.outputFolder)
         self.__btn.setText('Close')
+
+    def onOptimizationProgress(self, data):
+        if data.startswith('Evaluation'):
+            self.__currentEvals += 1
+            val = int((self.__currentEvals / self.__totalEvals) * 100)
+            self.__progressBar.setValue(val)
 
     def onRunComplete(self, data):
         self.__progressBar.setMaximum(100)
