@@ -129,7 +129,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "niaaml"
-version = "1.0.0rc7"
+version = "1.1.0"
 description = "Python automated machine learning framework."
 category = "main"
 optional = false
@@ -407,7 +407,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "1d0f4ebe45cd7b3500b5655aa1afe5571b8ed96bca64c77d1fa0da547d1f98b6"
+content-hash = "11251661dbae998aca9a2c027b56e4f97f2983bafa450322c84fa160f241f308"
 
 [metadata.files]
 atomicwrites = [
@@ -515,8 +515,8 @@ more-itertools = [
     {file = "more_itertools-8.6.0-py3-none-any.whl", hash = "sha256:8e1a2a43b2f2727425f2b5839587ae37093f19153dc26c0927d1048ff6557330"},
 ]
 niaaml = [
-    {file = "NiaAML-1.0.0rc7-py3-none-any.whl", hash = "sha256:ad4067d178107a4562343e933e5da3fa86f35dc81bf51980195b7919d0671cf3"},
-    {file = "NiaAML-1.0.0rc7.tar.gz", hash = "sha256:6776611b5459ded666ae11de1f881c740ce4d6a179a61cd6d404d3bf226585ab"},
+    {file = "NiaAML-1.1.0-py3-none-any.whl", hash = "sha256:643c3ec2b562c4954857e27a57b73b81aaeeb745861c088acabe501ef0b10df5"},
+    {file = "NiaAML-1.1.0.tar.gz", hash = "sha256:09bb7b24c4fdcc213810312dab22bc6241271118cb50882f21d91b475401fc9a"},
 ]
 niapy = [
     {file = "NiaPy-2.0.0rc12-py3-none-any.whl", hash = "sha256:4a1fd142e7f64ab32f13134e9115682fde13989adad87f02487ba6f1c14dc034"},
