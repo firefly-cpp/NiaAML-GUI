@@ -30,11 +30,12 @@ class OptimizationWidget(BaseMainWidget):
     __niaamlEncodersList = list(__niaamlEncoders.keys())
     __niaamlImputersList = list(__niaamlImputers.keys())
 
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, is_v1 = False, *args, **kwargs):
         self.__niapyAlgorithmsList.sort()
         self.__niaamlFeatureSelectionAlgorithmsList.sort()
         self.__niaamlFeatureTransformAlgorithmsList.sort()
         self.__niaamlClassifiersList.sort()
+        self.__is_v1 = is_v1
         super().__init__(parent, *args, **kwargs)
 
         fileLayout = QHBoxLayout(self._parent)
@@ -92,13 +93,21 @@ class OptimizationWidget(BaseMainWidget):
         settingsBox = self.__createGridLayoutBox((0, 0, 5, 5), False, 'transparent')
         settingsBox.setVerticalSpacing(10)
 
-        optAlgos = self.__createComboBox('Optimization Algorithm (components selection):', self.__niapyAlgorithmsList, 'optAlgos')
+        optAlgosLabel = 'Optimization Algorithm (components selection):' if not self.__is_v1 else 'Optimization Algorithm:'
+        optAlgos = self.__createComboBox(optAlgosLabel, self.__niapyAlgorithmsList, 'optAlgos')
+
         optAlgosInner = self.__createComboBox('Optimization Algorithm (parameter tuning) - same as first if not selected:', [*['None'], *self.__niapyAlgorithmsList], 'optAlgosInner')
 
         validator = QtGui.QRegExpValidator(QtCore.QRegExp('[1-9][0-9]*'))
-        popSize = self.__createTextInput('Population size (components selection):', 'popSize', validator)
+
+        popSizeLabel = 'Population size (components selection):' if not self.__is_v1 else 'Population size:'
+        popSize = self.__createTextInput(popSizeLabel, 'popSize', validator)
+
         popSizeInner = self.__createTextInput('Population size (parameter tuning):', 'popSizeInner', validator)
-        numEvals = self.__createTextInput('Number of evaluations (components selection):', 'numEvals', validator)
+
+        numEvalsLabel = 'Number of evaluations (components selection):' if not self.__is_v1 else 'Number of evaluations'
+        numEvals = self.__createTextInput(numEvalsLabel, 'numEvals', validator)
+
         numEvalsInner = self.__createTextInput('Number of evaluations (parameter tuning):', 'numEvalsInner', validator)
 
         fitFuncs = self.__createComboBox('Fitness Function:', self.__niaamlFitnessFunctionsList, 'fitFuncs')
@@ -116,11 +125,14 @@ class OptimizationWidget(BaseMainWidget):
         selectOutputFolderBar.addWidget(self._createButton('Select folder', self.__selectDirectory))
 
         settingsBox.addItem(optAlgos)
-        settingsBox.addItem(optAlgosInner)
+        if not self.__is_v1:
+            settingsBox.addItem(optAlgosInner)
         settingsBox.addItem(popSize)
-        settingsBox.addItem(popSizeInner)
+        if not self.__is_v1:
+            settingsBox.addItem(popSizeInner)
         settingsBox.addItem(numEvals)
-        settingsBox.addItem(numEvalsInner)
+        if not self.__is_v1:
+            settingsBox.addItem(numEvalsInner)
         settingsBox.addItem(fitFuncs)
         settingsBox.addItem(selectOutputFolderBar)
 
@@ -228,9 +240,11 @@ class OptimizationWidget(BaseMainWidget):
         imputerName = self.__niaamlImputers[str(self.findChild(QComboBox, 'imputers').currentText())]
 
         optAlgName = str(self.findChild(QComboBox, 'optAlgos').currentText())
-        optAlgInnerName = str(self.findChild(QComboBox, 'optAlgosInner').currentText())
-        if optAlgInnerName == 'None':
-            optAlgInnerName = optAlgName
+
+        if not self.__is_v1:
+            optAlgInnerName = str(self.findChild(QComboBox, 'optAlgosInner').currentText())
+            if optAlgInnerName == 'None':
+                optAlgInnerName = optAlgName
 
         popSize = self.findChild(QLineEdit, 'popSize').text()
         if self._isNoneOrWhiteSpace(popSize):
@@ -241,14 +255,15 @@ class OptimizationWidget(BaseMainWidget):
             except:
                 err += 'Invalid population size value.\n'
 
-        popSizeInner = self.findChild(QLineEdit, 'popSizeInner').text()
-        if self._isNoneOrWhiteSpace(popSizeInner):
-            err += 'Select inner population size.\n'
-        else:
-            try:
-                popSizeInner = int(popSizeInner)
-            except:
-                err += 'Invalid inner population size value.\n'
+        if not self.__is_v1:
+            popSizeInner = self.findChild(QLineEdit, 'popSizeInner').text()
+            if self._isNoneOrWhiteSpace(popSizeInner):
+                err += 'Select inner population size.\n'
+            else:
+                try:
+                    popSizeInner = int(popSizeInner)
+                except:
+                    err += 'Invalid inner population size value.\n'
 
         numEvals = self.findChild(QLineEdit, 'numEvals').text()
         if self._isNoneOrWhiteSpace(numEvals):
@@ -259,14 +274,15 @@ class OptimizationWidget(BaseMainWidget):
             except:
                 err += 'Invalid number of evaluations.\n'
 
-        numEvalsInner = self.findChild(QLineEdit, 'numEvalsInner').text()
-        if self._isNoneOrWhiteSpace(numEvalsInner):
-            err += 'Select number of inner evaluations.\n'
-        else:
-            try:
-                numEvalsInner = int(numEvalsInner)
-            except:
-                err += 'Invalid number of inner evaluations.\n'
+        if not self.__is_v1:
+            numEvalsInner = self.findChild(QLineEdit, 'numEvalsInner').text()
+            if self._isNoneOrWhiteSpace(numEvalsInner):
+                err += 'Select number of inner evaluations.\n'
+            else:
+                try:
+                    numEvalsInner = int(numEvalsInner)
+                except:
+                    err += 'Invalid number of inner evaluations.\n'
         
         fsasList = self.findChild(ListWidgetCustom, 'fsasList')
         fsas = [self.__niaamlFeatureSelectionAlgorithms[fsasList.item(i).text()] for i in range(fsasList.count())]
@@ -290,25 +306,46 @@ class OptimizationWidget(BaseMainWidget):
             self._parent.errorMessage.show()
             return
         
-        self._processWindow = ProcessWindow(
-            self._parent,
-            ProcessWindowData(
-                True,
-                csvSrc,
-                self.findChild(QCheckBox, 'csv').isChecked(),
-                encoderName,
-                imputerName,
-                optAlgName,
-                optAlgInnerName,
-                popSize,
-                popSizeInner,
-                numEvals,
-                numEvalsInner,
-                fsas,
-                ftas,
-                classifiers,
-                fitnessFunctionName,
-                outputFolder
+        if not self.__is_v1:
+            self._processWindow = ProcessWindow(
+                self._parent,
+                ProcessWindowData(
+                    True,
+                    csvSrc,
+                    self.findChild(QCheckBox, 'csv').isChecked(),
+                    encoderName,
+                    imputerName,
+                    optAlgName,
+                    optAlgInnerName,
+                    popSize,
+                    popSizeInner,
+                    numEvals,
+                    numEvalsInner,
+                    fsas,
+                    ftas,
+                    classifiers,
+                    fitnessFunctionName,
+                    outputFolder
+                    )
                 )
-            )
+        else:
+            self._processWindow = ProcessWindow(
+                self._parent,
+                ProcessWindowData(
+                    'v1',
+                    csvSrc,
+                    self.findChild(QCheckBox, 'csv').isChecked(),
+                    encoderName,
+                    imputerName,
+                    optAlgName=optAlgName,
+                    popSize=popSize,
+                    numEvals=numEvals,
+                    fsas=fsas,
+                    ftas=ftas,
+                    classifiers=classifiers,
+                    fitnessFunctionName=fitnessFunctionName,
+                    outputFolder=outputFolder
+                    )
+                )
+
         self._processWindow.show()

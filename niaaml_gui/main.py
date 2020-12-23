@@ -24,10 +24,13 @@ class MainAppWindow(QMainWindow):
         exitAction.triggered.connect(qApp.quit)
         newPipelineAction = QAction(text='New Pipeline', parent=self)
         newPipelineAction.triggered.connect(self.__setOptimizationView)
+        newPipelineActionV1 = QAction(text='New Pipeline V1', parent=self)
+        newPipelineActionV1.triggered.connect(self.__setOptimizationV1View)
         useExistingPipelineAction = QAction(text='Use Existing Pipeline', parent=self)
         useExistingPipelineAction.triggered.connect(self.__setUsePipelineView)
 
         fileMenu.addAction(newPipelineAction)
+        fileMenu.addAction(newPipelineActionV1)
         fileMenu.addAction(useExistingPipelineAction)
         fileMenu.addAction(exitAction)
 
@@ -40,6 +43,9 @@ class MainAppWindow(QMainWindow):
 
     def __setOptimizationView(self):
         self.setCentralWidget(OptimizationWidget(self))
+
+    def __setOptimizationV1View(self):
+        self.setCentralWidget(OptimizationWidget(self, True))
 
     def __setUsePipelineView(self):
         self.setCentralWidget(UsePipelineWidget(self))

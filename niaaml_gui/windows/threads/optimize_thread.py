@@ -25,11 +25,14 @@ class OptimizeThread(QtCore.QThread):
         )
         optimizer._PipelineOptimizer__logger = HackyLogger(self.progress.emit)
 
-        pipeline = optimizer.run(self.__data.fitnessFunctionName, self.__data.popSize, self.__data.popSizeInner, self.__data.numEvals, self.__data.numEvalsInner, self.__data.optAlgName, self.__data.optAlgInnerName)
+        if self.__data.isOptimization is True:
+            pipeline = optimizer.run(self.__data.fitnessFunctionName, self.__data.popSize, self.__data.popSizeInner, self.__data.numEvals, self.__data.numEvalsInner, self.__data.optAlgName, self.__data.optAlgInnerName)
+        else:
+            pipeline = optimizer.run_v1(self.__data.fitnessFunctionName, self.__data.popSize, self.__data.numEvals, self.__data.optAlgName)
+
         pipeline.export(os.path.join(self.__data.outputFolder, 'niaamlGUIoutput'))
         pipeline.export_text(os.path.join(self.__data.outputFolder, 'niaamlGUIoutput'))
         self.optimized.emit(pipeline.to_string())
-
 
 class HackyLogger:
     def __init__(self, emit_func,  **kwargs):

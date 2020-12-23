@@ -38,10 +38,10 @@ class ProcessWindow(QMainWindow):
 
         self.__data = copy.deepcopy(data)
 
-        if self.__data.isOptimization:
+        if self.__data.isOptimization is True or self.__data.isOptimization == 'v1':
             self.__progressBar.setMaximum(100)
             self.__currentEvals = 0
-            self.__totalEvals = data.numEvals * data.numEvalsInner
+            self.__totalEvals = data.numEvals * data.numEvalsInner if data.isOptimization is True else data.numEvals
             optimizer = OptimizeThread(self.__data)
             optimizer.optimized.connect(self.onOptimizationComplete)
             optimizer.progress.connect(self.onOptimizationProgress)
