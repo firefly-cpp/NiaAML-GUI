@@ -129,7 +129,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "niaaml"
-version = "1.1.1rc1"
+version = "1.1.1rc2"
 description = "Python automated machine learning framework."
 category = "main"
 optional = false
@@ -299,7 +299,7 @@ six = ">=1.5"
 
 [[package]]
 name = "pytz"
-version = "2020.4"
+version = "2020.5"
 description = "World timezone definitions, modern and historical"
 category = "main"
 optional = false
@@ -407,7 +407,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "022e5fd981dc153ce02c714cb7b23484f79fdf392d3ee277e2cd0be0d81c9587"
+content-hash = "622ea5fdfc1a28cf97211fb952d4c2d6b405da0ca47cf5ad570c2b7d8b8eae93"
 
 [metadata.files]
 atomicwrites = [
@@ -515,8 +515,8 @@ more-itertools = [
     {file = "more_itertools-8.6.0-py3-none-any.whl", hash = "sha256:8e1a2a43b2f2727425f2b5839587ae37093f19153dc26c0927d1048ff6557330"},
 ]
 niaaml = [
-    {file = "NiaAML-1.1.1rc1-py3-none-any.whl", hash = "sha256:46f010d3bc6d79cb611306c0671166390d149ff42bdc94bbea80c2f51211d182"},
-    {file = "NiaAML-1.1.1rc1.tar.gz", hash = "sha256:812c34fc160aa2071e972686fdc4f6a2df94ddb073837b5359bd380c11fccc0b"},
+    {file = "NiaAML-1.1.1rc2-py3-none-any.whl", hash = "sha256:5b11aa5da87b0ac660e685190b65f23894db584de002b7a416b80d93c3054da6"},
+    {file = "NiaAML-1.1.1rc2.tar.gz", hash = "sha256:0e3fafe557f434899ccf98617d09dec108301575583dd376fbbdf59baedb3198"},
 ]
 niapy = [
     {file = "NiaPy-2.0.0rc12-py3-none-any.whl", hash = "sha256:4a1fd142e7f64ab32f13134e9115682fde13989adad87f02487ba6f1c14dc034"},
@@ -672,8 +672,8 @@ python-dateutil = [
     {file = "python_dateutil-2.8.1-py2.py3-none-any.whl", hash = "sha256:75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"},
 ]
 pytz = [
-    {file = "pytz-2020.4-py2.py3-none-any.whl", hash = "sha256:5c55e189b682d420be27c6995ba6edce0c0a77dd67bfbe2ae6607134d5851ffd"},
-    {file = "pytz-2020.4.tar.gz", hash = "sha256:3e6b7dd2d1e0a59084bcee14a17af60c5c562cdc16d828e8eba2e683d3a7e268"},
+    {file = "pytz-2020.5-py2.py3-none-any.whl", hash = "sha256:16962c5fb8db4a8f63a26646d8886e9d769b6c511543557bc84e9569fb9a9cb4"},
+    {file = "pytz-2020.5.tar.gz", hash = "sha256:180befebb1927b16f6b57101720075a984c019ac16b1b7575673bea42c6c3da5"},
 ]
 qtawesome = [
     {file = "QtAwesome-1.0.2-py3-none-any.whl", hash = "sha256:fc81b7c7a1919e95f535a145b3027ad9eccd336696fffc47d8c1d443584d9f7a"},

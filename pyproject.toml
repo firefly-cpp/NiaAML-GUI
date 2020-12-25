@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "NiaAML-GUI"
-version = "0.1.9"
+version = "0.1.10"
 description = ""
 authors = ["Luka Pečnik <lukapecnik96@gmail.com>"]
 
@@ -9,7 +9,7 @@ python = "^3.6.1"
 PyQt5 = "^5.15.2"
 NiaPy = "^2.0.0rc12"
 QtAwesome = "^1.0.2"
-niaaml = "^1.1.1rc1"
+niaaml = "^1.1.1rc2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
