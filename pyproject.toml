@@ -15,7 +15,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.6.1"
 PyQt5 = "^5.15.0"
-NiaPy = "^2.0.0rc12"
+NiaPy = "^2.0.0rc18"
 QtAwesome = "^1.0.2"
 niaaml = "^1.1.1rc2"
 
