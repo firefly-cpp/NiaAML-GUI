@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayo
 from PyQt5 import QtGui
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtCore
-from NiaPy.algorithms.utility import AlgorithmUtility
+from niapy.util.factory import _algorithm_options
 from niaaml_gui.widgets.list_widget_custom import ListWidgetCustom
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
 from niaaml_gui.windows import ProcessWindow
@@ -22,7 +22,7 @@ class OptimizationWidget(BaseMainWidget):
     __niaamlFitnessFunctions = FitnessFactory().get_name_to_classname_mapping()
     __niaamlEncoders = EncoderFactory().get_name_to_classname_mapping()
     __niaamlImputers = ImputerFactory().get_name_to_classname_mapping()
-    __niapyAlgorithmsList = list(AlgorithmUtility().algorithm_classes.keys())
+    __niapyAlgorithmsList = list(_algorithm_options().keys())
     __niaamlFeatureSelectionAlgorithmsList = list(__niaamlFeatureSelectionAlgorithms.keys())
     __niaamlFeatureTransformAlgorithmsList = list(__niaamlFeatureTransformAlgorithms.keys())
     __niaamlClassifiersList = list(__niaamlClassifiers.keys())
