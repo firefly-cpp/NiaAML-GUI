@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "NiaAML-GUI"
-version = "0.1.10"
+version = "0.1.11"
 description = "GUI for NiaAML Python package"
 license = "MIT"
 authors = ["Luka Pečnik <lukapecnik96@gmail.com>"]
