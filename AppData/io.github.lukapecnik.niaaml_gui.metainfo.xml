@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.lukapecnik.niaaml_gui</id>
+
+  <name>NiaAML-GUI</name>
+  <summary>A basic graphical user interface intended for users of the NiaAML Python package.</summary>
+
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+
+  <description>
+    <p>
+      NiaAML GUI application allows you to use main features of the NiaAML framework. There are two views in the application. In the first one, you can prepare an environment for a pipeline optimization process. The purpose of the second one is to allow you to use an existing pipeline from a file. The application currently supports data input in a form of CSV files.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.lukapecnik.niaaml_gui.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/lukapecnik/NiaAML-GUI/master/.github/gui1.png</image>
+    </screenshot>
+  </screenshots>
+</component>
