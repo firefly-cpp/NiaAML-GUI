@@ -8,9 +8,6 @@ keywords = ['classification', 'NiaPy', 'NiaAML', 'scikit-learn', 'nature-inspire
 homepage = "https://github.com/lukapecnik/NiaAML-GUI"
 repository = "https://github.com/lukapecnik/NiaAML-GUI"
 readme = "README.rst"
-include = [
-    "LICENSE"
-]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
