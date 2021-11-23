@@ -50,9 +50,12 @@ class MainAppWindow(QMainWindow):
     def __setUsePipelineView(self):
         self.setCentralWidget(UsePipelineWidget(self))
 
-if __name__ == '__main__':
+def run():
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     mainWin = MainAppWindow()
     mainWin.show()
     sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    run()

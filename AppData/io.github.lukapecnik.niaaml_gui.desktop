@@ -7,5 +7,5 @@ Comment=A basic graphical user interface intended for users of the NiaAML Python
 Categories=Science;ArtificialIntelligence;
 
 Icon=niaaml-gui
-Exec=main.py
+Exec=NiaAML-GUI
 Terminal=false
