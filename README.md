@@ -1,5 +1,19 @@
 # NiaAML-GUI
 
+---
+
+[![PyPI Version](https://img.shields.io/pypi/v/niaaml-gui.svg)](https://pypi.python.org/pypi/niaaml-gui)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/niaaml-gui.svg)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/niaaml-gui.svg)
+[![GitHub license](https://img.shields.io/github/license/lukapecnik/NiaAML-GUI.svg)](https://github.com/flukapecnik/NiaAML-GUI/blob/master/LICENSE)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/lukapecnik/NiaAML-GUI.svg)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/lukapecnik/NiaAML-GUI.svg)](http://isitmaintained.com/project/lukapecnik/NiaAML-GUI "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/lukapecnik/NiaAML-GUI.svg)](http://isitmaintained.com/project/lukapecnik/NiaAML-GUI "Percentage of issues still open")
+![GitHub contributors](https://img.shields.io/github/contributors/lukapecnik/NiaAML-GUI.svg)
+[![Fedora package](https://img.shields.io/fedora/v/NiaAML-GUI?color=blue&label=Fedora%20Linux&logo=fedora)](https://src.fedoraproject.org/rpms/NiaAML-GUI)
+
+---
+
 This is a basic graphical user interface intended for users of the [NiaAML](https://github.com/lukapecnik/NiaAML) Python package.
 
 * **Python versions:** 3.6.x, 3.7.x, 3.8.x
@@ -16,6 +30,14 @@ After a successful installation, run the [main.py](niaaml_gui/main.py):
 
 ```sh
 python main.py
+```
+
+### Fedora Linux
+
+To install NiaAML GUI on Fedora, use:
+
+```sh
+$ dnf install NiaAML-GUI
 ```
 
 ## Usage
