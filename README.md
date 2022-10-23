@@ -16,7 +16,7 @@
 
 This is a basic graphical user interface intended for users of the [NiaAML](https://github.com/lukapecnik/NiaAML) Python package.
 
-* **Python versions:** 3.6.x, 3.7.x, 3.8.x
+* **Python versions:** 3.9.x, 3.10.x, 3.11.x
 
 ## Installation
 
