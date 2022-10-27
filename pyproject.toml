@@ -7,7 +7,7 @@ authors = ["Luka Pečnik <lukapecnik96@gmail.com>"]
 keywords = ['classification', 'NiaPy', 'NiaAML', 'scikit-learn', 'nature-inspired algorithms', 'feature selection', 'preprocessing']
 homepage = "https://github.com/lukapecnik/NiaAML-GUI"
 repository = "https://github.com/lukapecnik/NiaAML-GUI"
-readme = "README.rst"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
