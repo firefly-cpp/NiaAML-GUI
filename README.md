@@ -40,6 +40,14 @@ To install NiaAML GUI on Fedora, use:
 $ dnf install NiaAML-GUI
 ```
 
+### Alpine Linux
+
+To install NiaAML GUI on Alpine Linux, please enable Community repository and use:
+
+```sh
+$ apk add niaaml-gui
+```
+
 ## Usage
 
 NiaAML GUI application allows you to use main features of the [NiaAML](https://github.com/lukapecnik/NiaAML) framework. There are two views in the application. In the first one, you can prepare an environment for a pipeline optimization process. The purpose of the second one is to allow you to use an existing pipeline from a file. **The application currently supports data input in a form of CSV files.**
