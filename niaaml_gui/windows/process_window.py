@@ -1,9 +1,16 @@
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit, QPushButton, QHBoxLayout
-from PyQt5.QtCore import QSize
+from PyQt6.QtWidgets import (
+    QMainWindow,
+    QVBoxLayout,
+    QWidget,
+    QPlainTextEdit,
+    QPushButton,
+    QHBoxLayout,
+)
+from PyQt6.QtCore import QSize, Qt
 from niaaml_gui.progress_bar import ProgressBar
 from niaaml_gui.windows.threads import OptimizeThread, RunThread
 import copy
+
 
 class ProcessWindow(QMainWindow):
     def __init__(self, parent, data):
@@ -12,7 +19,7 @@ class ProcessWindow(QMainWindow):
 
         centralWidget = QWidget(self)
         layout = QVBoxLayout(centralWidget)
-        layout.setAlignment(QtCore.Qt.AlignTop)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__progressBar = ProgressBar()
         layout.addWidget(self.__progressBar)
 
@@ -24,7 +31,7 @@ class ProcessWindow(QMainWindow):
         confirmBar.addStretch()
 
         self.__btn = QPushButton(self)
-        self.__btn.setText('Cancel')
+        self.__btn.setText("Cancel")
         font = self.__btn.font()
         font.setPointSize(12)
         self.__btn.setFont(font)
@@ -38,16 +45,20 @@ class ProcessWindow(QMainWindow):
 
         self.__data = copy.deepcopy(data)
 
-        if self.__data.isOptimization is True or self.__data.isOptimization == 'v1':
+        if self.__data.isOptimization is True or self.__data.isOptimization == "v1":
             self.__progressBar.setMaximum(100)
             self.__currentEvals = 0
-            self.__totalEvals = data.numEvals * data.numEvalsInner if data.isOptimization is True else data.numEvals
+            self.__totalEvals = (
+                data.numEvals * data.numEvalsInner
+                if data.isOptimization is True
+                else data.numEvals
+            )
             optimizer = OptimizeThread(self.__data)
             optimizer.optimized.connect(self.onOptimizationComplete)
             optimizer.progress.connect(self.onOptimizationProgress)
             self.__runningThread = optimizer
             optimizer.start()
-            self.__textArea.appendPlainText('Pipeline optimization running...\n')
+            self.__textArea.appendPlainText("Pipeline optimization running...\n")
         else:
             self.__progressBar.setMaximum(0)
             self.__progressBar.setTextVisible(False)
@@ -55,24 +66,26 @@ class ProcessWindow(QMainWindow):
             runner.ran.connect(self.onRunComplete)
             self.__runningThread = runner
             runner.start()
-            self.__textArea.appendPlainText('Pipeline running...\n')
-    
+            self.__textArea.appendPlainText("Pipeline running...\n")
+
     def cancelClose(self):
         self.close()
         try:
             self.__runningThread.terminate()
-        except:
+        except BaseException:
             return
-    
+
     def onOptimizationComplete(self, data):
         self.__progressBar.setValue(100)
-        self.__textArea.appendPlainText(data + '\n')
-        self.__textArea.appendPlainText('Pipeline optimization complete.')
-        self.__textArea.appendPlainText('Results exported to: ' + self.__data.outputFolder)
-        self.__btn.setText('Close')
+        self.__textArea.appendPlainText(data + "\n")
+        self.__textArea.appendPlainText("Pipeline optimization complete.")
+        self.__textArea.appendPlainText(
+            "Results exported to: " + self.__data.outputFolder
+        )
+        self.__btn.setText("Close")
 
     def onOptimizationProgress(self, data):
-        if data.startswith('Evaluation'):
+        if data.startswith("Evaluation"):
             self.__currentEvals += 1
             val = int((self.__currentEvals / self.__totalEvals) * 100)
             self.__progressBar.setValue(val)
@@ -80,7 +93,6 @@ class ProcessWindow(QMainWindow):
     def onRunComplete(self, data):
         self.__progressBar.setMaximum(100)
         self.__progressBar.setValue(100)
-        self.__textArea.appendPlainText('Predictions: ' + data + '\n')
-        self.__textArea.appendPlainText('Pipeline run complete.')
-        self.__btn.setText('Close')
-
+        self.__textArea.appendPlainText("Predictions: " + data + "\n")
+        self.__textArea.appendPlainText("Pipeline run complete.")
+        self.__btn.setText("Close")
