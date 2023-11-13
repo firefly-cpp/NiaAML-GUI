@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QWidget, QPushButton, QLineEdit, QFileDialog
 from niaaml_gui.windows import CSVEditorWindow
 from PyQt6.QtCore import QSize
 
+
 class BaseMainWidget(QWidget):
     def __init__(self, parent, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
@@ -9,7 +10,7 @@ class BaseMainWidget(QWidget):
         self._processWindow = None
         self.__csvEditWindow = None
 
-    def _createButton(self, text, callback = None, objectName = None, icon = None):
+    def _createButton(self, text, callback=None, objectName=None, icon=None):
         btn = QPushButton(self._parent)
         btn.setText(text)
         font = btn.font()
@@ -18,7 +19,7 @@ class BaseMainWidget(QWidget):
 
         if callback is not None:
             btn.clicked.connect(callback)
-        
+
         if objectName is not None:
             btn.setObjectName(objectName)
 
@@ -33,11 +34,13 @@ class BaseMainWidget(QWidget):
             return True
 
     def _openCSVFile(self):
-        fname = QFileDialog.getOpenFileName(parent=self._parent, caption='Select CSV File', filter='CSV files (*.csv)')
-        self.findChild(QLineEdit, 'csvFile').setText(fname[0])
-        self.findChild(QPushButton, 'editCSVButton').setEnabled(True)
+        fname = QFileDialog.getOpenFileName(
+            parent=self._parent, caption="Select CSV File", filter="CSV files (*.csv)"
+        )
+        self.findChild(QLineEdit, "csvFile").setText(fname[0])
+        self.findChild(QPushButton, "editCSVButton").setEnabled(True)
 
     def _editCSVFile(self):
-        src = self.findChild(QLineEdit, 'csvFile').text()
+        src = self.findChild(QLineEdit, "csvFile").text()
         self.__csvEditWindow = CSVEditorWindow(src)
         self.__csvEditWindow.show()
