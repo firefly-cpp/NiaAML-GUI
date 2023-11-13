@@ -1,16 +1,15 @@
-from PyQt5 import QtCore
+from PyQt6.QtCore import QThread, pyqtSignal
 from niaaml.data import CSVDataReader
 from niaaml import PipelineOptimizer
 import os
-import sys
 
-class OptimizeThread(QtCore.QThread):
+class OptimizeThread(QThread):
 
-    optimized = QtCore.pyqtSignal(object)
-    progress = QtCore.pyqtSignal(object)
+    optimized = pyqtSignal(object)
+    progress = pyqtSignal(object)
 
     def __init__(self, data):
-        QtCore.QThread.__init__(self)
+        super().__init__()
         self.__data = data
     
     def run(self):

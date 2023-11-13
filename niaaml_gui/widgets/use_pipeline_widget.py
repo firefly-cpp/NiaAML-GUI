@@ -1,5 +1,5 @@
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QFileDialog, QLineEdit, QHBoxLayout, QVBoxLayout, QWidget, QFileDialog, QCheckBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QLineEdit, QHBoxLayout, QVBoxLayout, QFileDialog, QCheckBox
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
 from niaaml_gui.windows import ProcessWindow
 from niaaml_gui.process_window_data import ProcessWindowData
@@ -10,7 +10,7 @@ class UsePipelineWidget(BaseMainWidget):
         super().__init__(parent, *args, **kwargs)
     
         vBoxLayout = QVBoxLayout(self._parent)
-        vBoxLayout.setAlignment(QtCore.Qt.AlignTop)
+        vBoxLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         selectPPLNFileBar = QHBoxLayout(self._parent)
         selectPPLNFileBar.setSpacing(0)

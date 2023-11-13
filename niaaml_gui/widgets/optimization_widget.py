@@ -1,7 +1,6 @@
-from PyQt5.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget, QFileDialog, QCheckBox, QPushButton
-from PyQt5 import QtGui
-from PyQt5.QtGui import QIcon
-from PyQt5 import QtCore
+from PyQt6.QtWidgets import QComboBox, QLineEdit, QLabel, QHBoxLayout, QVBoxLayout, QGridLayout, QTabWidget, QFileDialog, QCheckBox
+from PyQt6.QtGui import QRegularExpressionValidator
+from PyQt6.QtCore import QRegularExpression
 from niapy.util.factory import _algorithm_options
 from niaaml_gui.widgets.list_widget_custom import ListWidgetCustom
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
@@ -98,7 +97,7 @@ class OptimizationWidget(BaseMainWidget):
 
         optAlgosInner = self.__createComboBox('Optimization Algorithm (parameter tuning) - same as first if not selected:', [*['None'], *self.__niapyAlgorithmsList], 'optAlgosInner')
 
-        validator = QtGui.QRegExpValidator(QtCore.QRegExp('[1-9][0-9]*'))
+        validator = QRegularExpressionValidator(QRegularExpression('[1-9][0-9]*'))
 
         popSizeLabel = 'Population size (components selection):' if not self.__is_v1 else 'Population size:'
         popSize = self.__createTextInput(popSizeLabel, 'popSize', validator)

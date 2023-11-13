@@ -1,6 +1,5 @@
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit, QPushButton, QHBoxLayout
-from PyQt5.QtCore import QSize
+from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit, QPushButton, QHBoxLayout
+from PyQt6.QtCore import QSize, Qt
 from niaaml_gui.progress_bar import ProgressBar
 from niaaml_gui.windows.threads import OptimizeThread, RunThread
 import copy
@@ -12,7 +11,7 @@ class ProcessWindow(QMainWindow):
 
         centralWidget = QWidget(self)
         layout = QVBoxLayout(centralWidget)
-        layout.setAlignment(QtCore.Qt.AlignTop)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.__progressBar = ProgressBar()
         layout.addWidget(self.__progressBar)
 

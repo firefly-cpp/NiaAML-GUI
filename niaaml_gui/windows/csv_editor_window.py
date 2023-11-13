@@ -1,8 +1,6 @@
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QTableView, QMessageBox, QVBoxLayout, QPushButton
-from PyQt5.QtCore import QSize
+from PyQt6.QtGui import QStandardItem, QStandardItemModel
+from PyQt6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QTableView, QMessageBox, QVBoxLayout, QPushButton
+from PyQt6.QtCore import QSize, Qt
 import csv
 import qtawesome as qta
 
@@ -13,7 +11,7 @@ class CSVEditorWindow(QMainWindow):
 
         self.__src = src
         self.__table = QTableView(self)
-        self.__model = QtGui.QStandardItemModel(self)
+        self.__model = QStandardItemModel(self)
         self.__table.setModel(self.__model)
 
         try:
@@ -24,7 +22,7 @@ class CSVEditorWindow(QMainWindow):
                     ]
                     self.__model.appendRow(items)
         except:
-            self.__errorMessage = QMessageBox(QMessageBox.Critical, 'Error', 'File could not be read.')
+            self.__errorMessage = QMessageBox(QMessageBox.Icon.Critical, 'Error', 'File could not be read.')
             self.__errorMessage.show()
             return
 
@@ -32,7 +30,7 @@ class CSVEditorWindow(QMainWindow):
         layout = QVBoxLayout(centralWidget)
         
         toolBar = QHBoxLayout(centralWidget)
-        toolBar.setAlignment(QtCore.Qt.AlignLeft)
+        toolBar.setAlignment(Qt.AlignmentFlag.AlignLeft)
         saveBtn = self.__createButton(None, self.__save, None, qta.icon('fa5.save'))
         toolBar.addWidget(saveBtn)
 
@@ -57,7 +55,7 @@ class CSVEditorWindow(QMainWindow):
 
         if icon is not None:
             btn.setIcon(icon)
-            btn.setIconSize(QtCore.QSize(21, 21))
+            btn.setIconSize(QSize(21, 21))
 
         return btn
     
@@ -65,7 +63,7 @@ class CSVEditorWindow(QMainWindow):
         self.__writeCsv(self.__src)
     
     def keyPressEvent(self, e):
-        if e.key() == QtCore.Qt.Key_Delete or e.key() == QtCore.Qt.Key_Backspace:
+        if e.key() == Qt.Key.Key_Delete or e.key() == Qt.Key.Key_Backspace:
             rows = self.__table.selectionModel().selectedRows()
             for index in rows:
                 self.__model.removeRow(index.row())
@@ -87,12 +85,12 @@ class CSVEditorWindow(QMainWindow):
                     fields = [
                         self.__model.data(
                             self.__model.index(rowNumber, columnNumber),
-                            QtCore.Qt.DisplayRole
+                            Qt.ItemDataRole.DisplayRole
                         )
                         for columnNumber in range(self.__model.columnCount())
                     ]
                     writer.writerow(fields)
         except:
-            self.__errorMessage = QMessageBox(QMessageBox.Critical, 'Error', 'File could not be saved.')
+            self.__errorMessage = QMessageBox(QMessageBox.Icon.Critical, 'Error', 'File could not be saved.')
             self.__errorMessage.show()
             return

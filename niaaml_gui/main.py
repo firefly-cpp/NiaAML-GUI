@@ -1,15 +1,9 @@
 import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import qApp, QMainWindow, QMessageBox, QAction
-from PyQt5.QtCore import QSize
+from PyQt6.QtWidgets import QMainWindow, QMessageBox, QApplication
+from PyQt6.QtGui import QAction
+from PyQt6.QtCore import QSize
 from niaaml_gui.widgets import OptimizationWidget, UsePipelineWidget
 
-class WriteStream(object):
-    def __init__(self,queue):
-        self.queue = queue
-
-    def write(self, text):
-        self.queue.append(text)
 
 class MainAppWindow(QMainWindow):
     def __init__(self):
@@ -21,7 +15,7 @@ class MainAppWindow(QMainWindow):
         menuBar.setNativeMenuBar(False)
         fileMenu = menuBar.addMenu('&File')
         exitAction = QAction(text='Exit', parent=self)
-        exitAction.triggered.connect(qApp.quit)
+        exitAction.triggered.connect(QApplication.quit)
         newPipelineAction = QAction(text='New Pipeline', parent=self)
         newPipelineAction.triggered.connect(self.__setOptimizationView)
         newPipelineActionV1 = QAction(text='New Pipeline V1', parent=self)
@@ -37,9 +31,9 @@ class MainAppWindow(QMainWindow):
         self.setCentralWidget(OptimizationWidget(self))
 
         self.errorMessage = QMessageBox()
-        self.errorMessage.setIcon(QMessageBox.Critical)
+        self.errorMessage.setIcon(QMessageBox.Icon.Critical)
         self.errorMessage.setWindowTitle('Error')
-        self.errorMessage.setStandardButtons(QMessageBox.Ok)
+        self.errorMessage.setStandardButtons(QMessageBox.StandardButton.Ok)
 
     def __setOptimizationView(self):
         self.setCentralWidget(OptimizationWidget(self))
@@ -51,11 +45,11 @@ class MainAppWindow(QMainWindow):
         self.setCentralWidget(UsePipelineWidget(self))
 
 def run():
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     app.setStyle('Fusion')
     mainWin = MainAppWindow()
     mainWin.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 if __name__ == '__main__':
     run()

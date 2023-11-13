@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QPushButton, QLineEdit, QFileDialog
+from PyQt6.QtWidgets import QWidget, QPushButton, QLineEdit, QFileDialog
 from niaaml_gui.windows import CSVEditorWindow
-from PyQt5 import QtCore
+from PyQt6.QtCore import QSize
 
 class BaseMainWidget(QWidget):
     def __init__(self, parent, *args, **kwargs):
@@ -24,7 +24,7 @@ class BaseMainWidget(QWidget):
 
         if icon is not None:
             btn.setIcon(icon)
-            btn.setIconSize(QtCore.QSize(21, 21))
+            btn.setIconSize(QSize(21, 21))
 
         return btn
 
