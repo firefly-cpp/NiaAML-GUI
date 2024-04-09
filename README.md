@@ -11,6 +11,7 @@
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/lukapecnik/NiaAML-GUI.svg)](http://isitmaintained.com/project/lukapecnik/NiaAML-GUI "Percentage of issues still open")
 ![GitHub contributors](https://img.shields.io/github/contributors/lukapecnik/NiaAML-GUI.svg)
 [![Fedora package](https://img.shields.io/fedora/v/NiaAML-GUI?color=blue&label=Fedora%20Linux&logo=fedora)](https://src.fedoraproject.org/rpms/NiaAML-GUI)
+[![Packaging status](https://repology.org/badge/tiny-repos/niaaml-gui.svg)](https://repology.org/project/niaaml-gui/versions)
 
 ---
 
