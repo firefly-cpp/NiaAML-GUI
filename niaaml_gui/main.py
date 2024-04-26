@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt6.QtWidgets import QMainWindow, QMessageBox, QApplication
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import QSize
@@ -48,6 +49,11 @@ class MainAppWindow(QMainWindow):
 def run():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'styles.qss'), 'r') as f:
+        style = f.read()
+        app.setStyleSheet(style)
+
     mainWin = MainAppWindow()
     mainWin.show()
     sys.exit(app.exec())

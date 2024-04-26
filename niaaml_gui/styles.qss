@@ -1,0 +1,59 @@
+QPushButton {
+    color: white;
+    background-color: #547500;
+    border: 2px solid #547500;
+    border-radius: 6;
+    padding: 2;
+    font-weight: 600;
+}
+
+QLabel {
+    width: fit-content;
+    font-weight: 700;
+    /* color: #547500; */
+}
+
+QPushButton#editCSVButton{
+    background-color:#547500;
+}
+
+QLineEdit {
+    border: 2px solid #547500;
+    border-radius:6;
+    padding: 1;
+}
+
+QComboBox::item:hover {
+    background-color: #547500;
+}
+
+QComboBox::item:selected:active {
+    background-color: #547500;
+}
+
+QTabBar::tab {
+    border: 2px solid #547500;
+    border-top-left-radius: 6;
+    border-top-right-radius: 6;
+    border-bottom: 0;
+    padding: 0 5px 0 5px;
+    font-weight: 600;
+}
+
+QTabBar::tab:selected {
+    background-color: #547500;
+    color: white;
+}
+
+QListWidget::item {
+    border: 2px solid #547500;
+    border-top: 0;
+}
+
+
+QListWidget::item:selected {
+    background-color: #547500;
+    color: white;
+    border: 2px solid #547500;
+    border-top: 0;
+}
