@@ -40,7 +40,7 @@ class CSVEditorWindow(QMainWindow):
 
         toolBar = QHBoxLayout(centralWidget)
         toolBar.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        saveBtn = self.__createButton(None, self.__save, None, qta.icon("fa5.save"))
+        saveBtn = self.__createButton(None, self.__save, None, qta.icon("fa5.save", color_off='white'))
         toolBar.addWidget(saveBtn)
 
         layout.addItem(toolBar)

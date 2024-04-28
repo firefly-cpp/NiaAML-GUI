@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QCheckBox,
 )
 from PyQt6.QtGui import QRegularExpressionValidator
-from PyQt6.QtCore import QRegularExpression
+from PyQt6.QtCore import QRegularExpression, Qt
 from niapy.util.factory import _algorithm_options
 from niaaml_gui.widgets.list_widget_custom import ListWidgetCustom
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
@@ -59,7 +59,7 @@ class OptimizationWidget(BaseMainWidget):
         fileLayout = QHBoxLayout(self._parent)
 
         selectFileBar = QHBoxLayout(self._parent)
-        selectFileBar.setSpacing(0)
+        selectFileBar.setSpacing(5)
         selectFileBar.setContentsMargins(0, 5, 5, 5)
         fNameLine = QLineEdit(self._parent)
         fNameLine.setObjectName("csvFile")
@@ -70,11 +70,12 @@ class OptimizationWidget(BaseMainWidget):
         fNameLine.setFont(font)
         selectFileBar.addWidget(fNameLine)
         editBtn = self._createButton(
-            None, self._editCSVFile, "editCSVButton", qta.icon("fa5.edit")
+            None, self._editCSVFile, "editCSVButton", qta.icon("fa5.edit", color_off='white')
         )
         editBtn.setEnabled(False)
         selectFileBar.addWidget(editBtn)
-        selectFileBar.addWidget(self._createButton("Select file", self._openCSVFile))
+        selectFileBar.addWidget(self._createButton(None, self._openCSVFile,
+                                                   icon=qta.icon("fa5.file", color_off='white')))
 
         checkBox = QCheckBox("CSV has header")
         checkBox.setObjectName("csv")
@@ -171,8 +172,9 @@ class OptimizationWidget(BaseMainWidget):
         foNameLine.setFont(font)
         selectOutputFolderBar.addWidget(foNameLine)
         selectOutputFolderBar.addWidget(
-            self._createButton("Select folder", self.__selectDirectory)
+            self._createButton(None, self.__selectDirectory, icon=qta.icon('fa5.folder', color_off='white'))
         )
+        selectOutputFolderBar.setSpacing(5)
 
         settingsBox.addItem(optAlgos)
         if not self.__is_v1:
@@ -227,7 +229,7 @@ class OptimizationWidget(BaseMainWidget):
         return comboBox
 
     def __createTextInput(self, label, name, validator=None):
-        textBox = QVBoxLayout()
+        textBox = QHBoxLayout()
         textBox.setSpacing(5)
         label = QLabel(label, self._parent)
         font = label.font()
