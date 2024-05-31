@@ -15,9 +15,9 @@
 
 ---
 
-This is a basic graphical user interface intended for users of the [NiaAML](https://github.com/lukapecnik/NiaAML) Python package.
+This is a basic graphical user interface intended for users of the [NiaAML](https://github.com/firefly-cpp/NiaAML) Python package.
 
-* **Python versions:** 3.9.x, 3.10.x, 3.11.x
+* **Python versions:** 3.9.x, 3.10.x, 3.11.x, 3.12.x
 
 ## Installation
 
@@ -51,7 +51,7 @@ $ apk add niaaml-gui
 
 ## Usage
 
-NiaAML GUI application allows you to use main features of the [NiaAML](https://github.com/lukapecnik/NiaAML) framework. There are two views in the application. In the first one, you can prepare an environment for a pipeline optimization process. The purpose of the second one is to allow you to use an existing pipeline from a file. **The application currently supports data input in a form of CSV files.**
+NiaAML GUI application allows you to use main features of the [NiaAML](https://github.com/firefly-cpp/NiaAML) framework. There are two views in the application. In the first one, you can prepare an environment for a pipeline optimization process. The purpose of the second one is to allow you to use an existing pipeline from a file. **The application currently supports data input in a form of CSV files.**
 
 ### Optimization View
 
@@ -174,4 +174,4 @@ The result for 5 individuals is the screenshot below.
 
 ## Cite us
 
-L. Pečnik, I. Fister Jr. "NiaAML: AutoML framework based on stochastic population-based nature-inspired algorithms." Journal of Open Source Software 6.61 (2021): 2949.
+L. Pečnik, I. Fister Jr. "[NiaAML: AutoML framework based on stochastic population-based nature-inspired algorithms](https://joss.theoj.org/papers/10.21105/joss.02949)." Journal of Open Source Software 6.61 (2021): 2949.
