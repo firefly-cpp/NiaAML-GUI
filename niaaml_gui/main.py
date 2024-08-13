@@ -4,6 +4,9 @@ from PyQt6.QtWidgets import QMainWindow, QMessageBox, QApplication
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import QSize
 from niaaml_gui.widgets import OptimizationWidget, UsePipelineWidget
+from niaaml_gui.widgets.help_authors_widget import HelpAuthorsWidget
+from niaaml_gui.widgets.help_documentation_widget import HelpDocumentationWidget
+from niaaml_gui.widgets.help_license_widget import HelpLicenseWidget
 
 
 class MainAppWindow(QMainWindow):
@@ -15,6 +18,7 @@ class MainAppWindow(QMainWindow):
         menuBar = self.menuBar()
         menuBar.setNativeMenuBar(False)
         fileMenu = menuBar.addMenu("&File")
+        helpMenu = menuBar.addMenu("&Help")
         exitAction = QAction(text="Exit", parent=self)
         exitAction.triggered.connect(QApplication.quit)
         newPipelineAction = QAction(text="New Pipeline", parent=self)
@@ -24,10 +28,21 @@ class MainAppWindow(QMainWindow):
         useExistingPipelineAction = QAction(text="Use Existing Pipeline", parent=self)
         useExistingPipelineAction.triggered.connect(self.__setUsePipelineView)
 
+        authorsAction = QAction(text="Authors", parent=self)
+        authorsAction.triggered.connect(self.__setHelpAuthorsView)
+        documentationAction = QAction(text="Documentation", parent=self)
+        documentationAction.triggered.connect(self.__setHelpDocumentationView)
+        licenseAction = QAction(text="License", parent=self)
+        licenseAction.triggered.connect(self.__setHelpLicenseView)
+
         fileMenu.addAction(newPipelineAction)
         fileMenu.addAction(newPipelineActionV1)
         fileMenu.addAction(useExistingPipelineAction)
         fileMenu.addAction(exitAction)
+
+        helpMenu.addAction(authorsAction)
+        helpMenu.addAction(documentationAction)
+        helpMenu.addAction(licenseAction)
 
         self.setCentralWidget(OptimizationWidget(self))
 
@@ -44,6 +59,15 @@ class MainAppWindow(QMainWindow):
 
     def __setUsePipelineView(self):
         self.setCentralWidget(UsePipelineWidget(self))
+
+    def __setHelpAuthorsView(self):
+        self.setCentralWidget(HelpAuthorsWidget(self))
+
+    def __setHelpDocumentationView(self):
+        self.setCentralWidget(HelpDocumentationWidget(self))
+
+    def __setHelpLicenseView(self):
+        self.setCentralWidget(HelpLicenseWidget(self))
 
 
 def run():
