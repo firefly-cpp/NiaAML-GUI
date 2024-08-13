@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
-from PyQt6.QtWidgets import QTextBrowser, QLabel, QVBoxLayout, QPushButton, QSizePolicy
+from PyQt6.QtWidgets import QLabel, QVBoxLayout, QPushButton
 import webbrowser
 
 from niaaml_gui.widgets.base_main_widget import BaseMainWidget
