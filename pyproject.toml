@@ -10,7 +10,7 @@ repository = "https://github.com/firefly-cpp/NiaAML-GUI"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.9,<3.13"
 niapy = "^2.3.1"
 QtAwesome = "^1.2.3"
 niaaml = "^2.1.0"
