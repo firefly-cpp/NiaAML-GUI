@@ -87,7 +87,7 @@ Below is a screenshot of the first view with labeled components and you can find
 <p align="center"><img src=".github/gui1.png" alt="NiaAML GUI First View" title="NiaAML GUI First View"/></p>
 
 | Component | Description |
-|-----------|-------------|
+|:----------|:------------|
 | 1         | Tabbed view for choosing components for the optimization. Clicked components get transferred to their corresponding brackets (labels **5**, **6** and **7**). |
 | 2         | Input CSV dataset's file selection widget. After the dataset has been selected, you can also view and edit it using the edit button next to the `Select file` button. **Also make sure you check the `CSV has header` checkbox in case the selected CSV file has a header row.** Below you can see a screenshot of the CSV file's editing window. <p align="center"><img src=".github/gui3.png" alt="NiaAML GUI Edit Dataset View" title="NiaAML GUI Edit Dataset View"/></p> |
 | 3         | Dropdown widget for categorical features' encoder selection. It will be ignored if the dataset contains no categorical features. |
@@ -118,7 +118,7 @@ Below is a screenshot of the second view with labeled components and you can fin
 <p align="center"><img src=".github/gui5.png" alt="NiaAML GUI Second View" title="NiaAML GUI Second View"/></p>
 
 | Component | Description |
-|-----------|-------------|
+|:----------|:------------|
 | 1         | Pipeline file selection widget. |
 | 2         | Input CSV file selection widget. The file should contain the same headers (if any) as the dataset in the optimization process and there should be no classes (expected results) present. After the dataset has been selected, you can also view and edit it using the edit button next to the `Select file` button. **Also make sure you check the** `CSV has header` **checkbox in case the selected CSV file has a header row.** |
 
