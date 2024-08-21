@@ -5,4 +5,4 @@ from niaaml_gui.process_window_data import ProcessWindowData
 from niaaml_gui.progress_bar import ProgressBar
 
 __all__ = ["widgets", "windows", "ProcessWindowData", "ProgressBar", "MainAppWindow"]
-__version__ = "0.3.1"
+__version__ = "0.3.2"
