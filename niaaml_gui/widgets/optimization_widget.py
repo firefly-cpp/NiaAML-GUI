@@ -273,7 +273,7 @@ class OptimizationWidget(BaseMainWidget):
             self.__niaamlFeatureTransformAlgorithmsList, ftasList
         )
         ftasList.setTarget(ftas)
-        tabs.addTab(ftas, "Feature Selection Algorithms")
+        tabs.addTab(ftas, "Feature Transform Algorithms")
 
         clas = self.__createListWidget(self.__niaamlClassifiersList, classifiersList)
         classifiersList.setTarget(clas)
