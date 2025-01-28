@@ -13,7 +13,7 @@ readme = "README.md"
 python = ">=3.9,<3.13"
 niapy = "^2.5.2"
 QtAwesome = "^1.2.3"
-niaaml = "^2.1.1"
+niaaml = "^2.1.2"
 scikit-learn = "^1.6.1"
 pyqt6 = "^6.6.0"
 
