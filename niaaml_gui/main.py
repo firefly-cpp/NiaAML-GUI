@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QMainWindow, QMessageBox, QApplication
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import QSize
 from niaaml_gui.widgets import OptimizationWidget, UsePipelineWidget
+from niaaml_gui.widgets.results_widget import ResultsWidget
 from niaaml_gui.widgets.help_authors_widget import HelpAuthorsWidget
 from niaaml_gui.widgets.help_documentation_widget import HelpDocumentationWidget
 from niaaml_gui.widgets.help_license_widget import HelpLicenseWidget
@@ -68,8 +69,12 @@ class MainAppWindow(QMainWindow):
 
     def __setHelpLicenseView(self):
         self.setCentralWidget(HelpLicenseWidget(self))
+        
+    def setResultsView(self,resultsData, pipelineText: str,pipelineSettings):
+        self.setCentralWidget(ResultsWidget(self, resultsData, pipelineSettings))
 
 
+    
 def run():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
@@ -79,7 +84,7 @@ def run():
         app.setStyleSheet(style)
 
     mainWin = MainAppWindow()
-    mainWin.show()
+    mainWin.showMaximized()
     sys.exit(app.exec())
 
 
