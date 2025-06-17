@@ -68,7 +68,7 @@ class ResultsWidget(QWidget):
         ax = fig.add_subplot(111)
         ax.set_facecolor("#005f85")  
         ax.bar(["Accuracy", "Precision", "F1", "Kappa"], [0.4634, 0.4478, 0.4339, 0.174])
-        ax.tick_params(colors="white")  # bela besedila na osi
+        ax.tick_params(colors="white")
         ax.spines['bottom'].set_color('white')
         ax.spines['left'].set_color('white')
         ax.yaxis.label.set_color('white')
@@ -84,7 +84,7 @@ class ResultsWidget(QWidget):
                 pipeline_table.setItem(row, 0, QTableWidgetItem(str(key)))
                 pipeline_table.setItem(row, 1, QTableWidgetItem(str(value)))
 
-            pipeline_table.resizeColumnsToContents()  # <- ključna vrstica
+            pipeline_table.resizeColumnsToContents()  
             pipeline_table.resizeRowsToContents()
 
             pipeline_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
