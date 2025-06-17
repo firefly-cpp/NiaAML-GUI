@@ -70,7 +70,7 @@ class MainAppWindow(QMainWindow):
     def __setHelpLicenseView(self):
         self.setCentralWidget(HelpLicenseWidget(self))
         
-    def setResultsView(self,resultsData, pipelineText: str,pipelineSettings):
+    def setResultsView(self, resultsData, pipelineSettings):
         self.setCentralWidget(ResultsWidget(self, resultsData, pipelineSettings))
 
 

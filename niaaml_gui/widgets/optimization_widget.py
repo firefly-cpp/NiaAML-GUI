@@ -396,7 +396,23 @@ class OptimizationWidget(BaseMainWidget):
             self._parent.errorMessage.setText(err)
             self._parent.errorMessage.show()
             return
-
+        pipelineSettings = {
+            "csvSrc": csvSrc,
+            "csvHasHeader": self.findChild(QCheckBox, "csv").isChecked(),
+            "encoder": encoderName,
+            "imputer": imputerName,
+            "optAlgName": optAlgName,
+            "optAlgInnerName": optAlgInnerName if not self.__is_v1 else None,
+            "popSize": popSize,
+            "popSizeInner": popSizeInner if not self.__is_v1 else None,
+            "numEvals": numEvals,
+            "numEvalsInner": numEvalsInner if not self.__is_v1 else None,
+            "fsas": ", ".join(fsas),
+            "ftas": ", ".join(ftas),
+            "classifiers": ", ".join(classifiers),
+            "fitnessFunctionName": fitnessFunctionName,
+            "outputFolder": outputFolder,
+        }
         if not self.__is_v1:
             self._processWindow = ProcessWindow(
                 self._parent,
@@ -418,6 +434,7 @@ class OptimizationWidget(BaseMainWidget):
                     fitnessFunctionName,
                     outputFolder,
                 ),
+                pipelineSettings
             )
         else:
             self._processWindow = ProcessWindow(
@@ -437,46 +454,8 @@ class OptimizationWidget(BaseMainWidget):
                     fitnessFunctionName=fitnessFunctionName,
                     outputFolder=outputFolder,
                 ),
+                pipelineSettings
             )
-        results_data = {
-            "accuracy": 0.111,
-            "precision": 0.78,
-            "f1_score": 0.9,
-            "kappa": 0.342,
-        }
-        print(
-            csvSrc,
-            self.findChild(QCheckBox, "csv").isChecked(),
-            encoderName,
-            imputerName,
-            optAlgName,
-            optAlgInnerName,
-            popSize,
-            popSizeInner,
-            numEvals,
-            numEvalsInner,
-            fsas,
-            ftas,
-            classifiers,
-            fitnessFunctionName,
-            outputFolder,
-        )
-        pipelineSettings = {
-            "csvSrc": csvSrc,
-            "csvHasHeader": self.findChild(QCheckBox, "csv").isChecked(),
-            "encoder": encoderName,
-            "imputer": imputerName,
-            "optAlgName": optAlgName,
-            "optAlgInnerName": optAlgInnerName if not self.__is_v1 else None,
-            "popSize": popSize,
-            "popSizeInner": popSizeInner if not self.__is_v1 else None,
-            "numEvals": numEvals,
-            "numEvalsInner": numEvalsInner if not self.__is_v1 else None,
-            "fsas": ", ".join(fsas),
-            "ftas": ", ".join(ftas),
-            "classifiers": ", ".join(classifiers),
-            "fitnessFunctionName": fitnessFunctionName,
-            "outputFolder": outputFolder,
-        }
-        self._parent.setResultsView(results_data,results_data, pipelineSettings)
-        # self._processWindow.show()
+
+        #self._parent.setResultsView(results_data,results_data, pipelineSettings)
+        self._processWindow.show()
