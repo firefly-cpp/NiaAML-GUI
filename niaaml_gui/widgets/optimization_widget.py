@@ -70,12 +70,18 @@ class OptimizationWidget(BaseMainWidget):
         fNameLine.setFont(font)
         selectFileBar.addWidget(fNameLine)
         editBtn = self._createButton(
-            None, self._editCSVFile, "editCSVButton", qta.icon("fa5.edit", color_off='white')
+            None,
+            self._editCSVFile,
+            "editCSVButton",
+            qta.icon("fa5.edit", color_off="white"),
         )
         editBtn.setEnabled(False)
         selectFileBar.addWidget(editBtn)
-        selectFileBar.addWidget(self._createButton(None, self._openCSVFile,
-                                                   icon=qta.icon("fa5.file", color_off='white')))
+        selectFileBar.addWidget(
+            self._createButton(
+                None, self._openCSVFile, icon=qta.icon("fa5.file", color_off="white")
+            )
+        )
 
         checkBox = QCheckBox("CSV has header")
         checkBox.setObjectName("csv")
@@ -172,7 +178,11 @@ class OptimizationWidget(BaseMainWidget):
         foNameLine.setFont(font)
         selectOutputFolderBar.addWidget(foNameLine)
         selectOutputFolderBar.addWidget(
-            self._createButton(None, self.__selectDirectory, icon=qta.icon('fa5.folder', color_off='white'))
+            self._createButton(
+                None,
+                self.__selectDirectory,
+                icon=qta.icon("fa5.folder", color_off="white"),
+            )
         )
         selectOutputFolderBar.setSpacing(5)
 
@@ -386,7 +396,23 @@ class OptimizationWidget(BaseMainWidget):
             self._parent.errorMessage.setText(err)
             self._parent.errorMessage.show()
             return
-
+        pipelineSettings = {
+            "csvSrc": csvSrc,
+            "csvHasHeader": self.findChild(QCheckBox, "csv").isChecked(),
+            "encoder": encoderName,
+            "imputer": imputerName,
+            "optAlgName": optAlgName,
+            "optAlgInnerName": optAlgInnerName if not self.__is_v1 else None,
+            "popSize": popSize,
+            "popSizeInner": popSizeInner if not self.__is_v1 else None,
+            "numEvals": numEvals,
+            "numEvalsInner": numEvalsInner if not self.__is_v1 else None,
+            "fsas": ", ".join(fsas),
+            "ftas": ", ".join(ftas),
+            "classifiers": ", ".join(classifiers),
+            "fitnessFunctionName": fitnessFunctionName,
+            "outputFolder": outputFolder,
+        }
         if not self.__is_v1:
             self._processWindow = ProcessWindow(
                 self._parent,
@@ -408,6 +434,7 @@ class OptimizationWidget(BaseMainWidget):
                     fitnessFunctionName,
                     outputFolder,
                 ),
+                pipelineSettings
             )
         else:
             self._processWindow = ProcessWindow(
@@ -427,6 +454,8 @@ class OptimizationWidget(BaseMainWidget):
                     fitnessFunctionName=fitnessFunctionName,
                     outputFolder=outputFolder,
                 ),
+                pipelineSettings
             )
 
+        #self._parent.setResultsView(results_data,results_data, pipelineSettings)
         self._processWindow.show()
