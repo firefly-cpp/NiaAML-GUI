@@ -48,13 +48,12 @@ class PipelineCanvas(QGraphicsView):
             "Number of Evaluations (Component Selection)",
             "Number of Evaluations (Parameter Tuning)"
         ]
-        
+
         if label in numeric_labels:
             block = NumericInputBlock(label)
         else:
-            block = InteractiveConfigBlock(label)  
-        
-        block = InteractiveConfigBlock(label, is_file=is_file, is_folder=is_folder)
+            block = InteractiveConfigBlock(label, is_file=is_file, is_folder=is_folder)
+
         block.setPos(x, y)
         self.scene.addItem(block)
         self.block_data[block] = {'label': label, 'path': None}
@@ -91,26 +90,43 @@ class PipelineCanvas(QGraphicsView):
         
 
 class InteractiveConfigBlock(QGraphicsRectItem):
-    def __init__(self, label: str, value: str = "", is_file: bool = False, is_folder: bool = False):
+    def __init__(self, label: str, value: str = "", is_file: bool = False, is_folder: bool = False, is_number_input: bool = False):
         super().__init__(0, 0, 220, 70)
         self.label = label
         self.value = value
         self.is_file = is_file
         self.is_folder = is_folder
+        self.is_number_input = is_number_input
 
         self.setBrush(QBrush(QColor("#005f85")))
         self.setPen(QPen(QColor("white")))
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsMovable)
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsSelectable)
 
-        self.label_item = QGraphicsTextItem(self.label, self)
+        self.label_item = QGraphicsTextItem(self)
         self.label_item.setDefaultTextColor(QColor("white"))
+        self.label_item.setTextWidth(200)
+        self.label_item.setPlainText(self.label)
         self.label_item.setPos(10, 5)
 
         self.value_item = QGraphicsTextItem(self.value or "Click to select...", self)
         self.value_item.setDefaultTextColor(QColor("white"))
         self.value_item.setPos(10, 30)
         self.value_item.setTextWidth(self.rect().width() - 20)
+
+        if self.is_number_input:
+            self.input_field = QLineEdit()
+            self.input_field.setValidator(QIntValidator(0, 999999))  # ali karkoli ustreznega
+            self.input_field.setFixedWidth(100)
+            self.input_field.setText(self.value)
+
+            self.proxy = QGraphicsProxyWidget(self)
+            self.proxy.setWidget(self.input_field)
+            self.proxy.setPos(10, 30)
+        else:
+            self.value_item = QGraphicsTextItem(self.value or "Click to select...", self)
+            self.value_item.setDefaultTextColor(QColor("white"))
+            self.value_item.setPos(10, 30)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -156,25 +172,34 @@ class InteractiveConfigBlock(QGraphicsRectItem):
             self.value_item.setPlainText(", ".join(selected))
             
 class NumericInputBlock(QGraphicsRectItem):
-    def __init__(self, label: str, default_value: int = 10):
+    def __init__(self, label: str):
         super().__init__(0, 0, 220, 70)
         self.label = label
-        self.value = default_value
 
         self.setBrush(QBrush(QColor("#005f85")))
         self.setPen(QPen(QColor("white")))
-        self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsMovable)
-        self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsSelectable)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
-        self.label_item = QGraphicsTextItem(self.label, self)
+        self.label_item = QGraphicsTextItem(self)
         self.label_item.setDefaultTextColor(QColor("white"))
+        self.label_item.setTextWidth(200)
+        self.label_item.setPlainText(self.label)
         self.label_item.setPos(10, 5)
 
-        self.input_field = QLineEdit(str(self.value))
-        self.input_field.setValidator(QIntValidator(1, 10000))
-        self.input_field_proxy = QGraphicsProxyWidget(self)
-        self.input_field_proxy.setWidget(self.input_field)
-        self.input_field_proxy.setPos(10, 35)
+        label_height = self.label_item.boundingRect().height()
 
-    def get_value(self) -> int:
-        return int(self.input_field.text())
+        self.input_field = QLineEdit()
+        self.input_field.setValidator(QIntValidator(0, 999999))
+        self.input_field.setFixedWidth(100)
+
+        self.proxy = QGraphicsProxyWidget(self)
+        self.proxy.setWidget(self.input_field)
+
+        self.proxy.setPos(10, 10 + label_height)
+
+        total_height = 10 + label_height + self.input_field.sizeHint().height() + 10
+        self.setRect(0, 0, 220, total_height)
+
+    def get_value(self):
+        return self.input_field.text()
