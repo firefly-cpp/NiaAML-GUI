@@ -95,6 +95,7 @@ class PipelineTestCase(TestCase):
             "ParticleSwarmAlgorithm",
             "Accuracy",
         )
+        pipeline._Pipeline__classifier.fit(data_reader.get_x(), data_reader.get_y())
         predicted = pipeline.run(
             pandas.DataFrame(
                 numpy.random.uniform(
