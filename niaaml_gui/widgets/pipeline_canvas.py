@@ -199,7 +199,7 @@ class NumericInputBlock(QGraphicsRectItem):
         self.proxy.setPos(10, 10 + label_height)
 
         total_height = 10 + label_height + self.input_field.sizeHint().height() + 10
-        self.setRect(0, 0, 220, total_height)
+        self.setRect(0, 0, 221, total_height)
 
     def get_value(self):
         return self.input_field.text()

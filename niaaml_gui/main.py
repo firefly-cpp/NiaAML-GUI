@@ -36,7 +36,7 @@ class MainAppWindow(QMainWindow):
         centralWidget.setLayout(mainLayout)
 
         self.setCentralWidget(centralWidget)
-
+        
         self.errorMessage = QMessageBox()
         self.errorMessage.setIcon(QMessageBox.Icon.Critical)
         self.errorMessage.setWindowTitle("Error")
