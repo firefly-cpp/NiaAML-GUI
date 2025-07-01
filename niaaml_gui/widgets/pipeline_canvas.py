@@ -1,6 +1,6 @@
 import os
-from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsTextItem, QGraphicsItem, QFileDialog, QLineEdit, QGraphicsProxyWidget, QComboBox
-from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QIntValidator, QFontMetricsF
+from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsTextItem, QGraphicsItem, QFileDialog, QLineEdit, QGraphicsProxyWidget, QComboBox, QGraphicsPixmapItem
+from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QIntValidator, QFontMetricsF, QPixmap
 from PyQt6.QtCore import Qt
 from niaaml.classifiers import ClassifierFactory
 from niaaml.preprocessing.feature_selection import FeatureSelectionAlgorithmFactory
@@ -65,12 +65,34 @@ class PipelineCanvas(QGraphicsView):
         elif label == "Fitness Function":
             dropdown_options = list(FitnessFactory().get_name_to_classname_mapping().keys())
 
+        icon_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "icons")
+        icon_map = {
+            "Select CSV File": "file.png",
+            "Categorical Encoder": "encode.png",
+            "Missing Imputer": "imputation.png",
+            "Feature Selection": "feature_selection.png",
+            "Feature Transform": "feature_transformation.png",
+            "Classifier": "classifier.png",
+            "Optimization Algorithm": "placeholder.png",
+            "Fitness Function": "placeholder.png",
+            "Pipeline Output Folder": "folder.png",
+            "Optimization Algorithm (Selection)": "placeholder.png",
+            "Optimization Algorithm (Tuning)": "placeholder.png",
+            "Population Size (Components Selection)": "placeholder.png",
+            "Population Size (Parameter Tuning)": "placeholder.png",
+            "Number of Evaluations (Component Selection)": "placeholder.png",
+            "Number of Evaluations (Parameter Tuning)": "placeholder.png"
+        }
+        icon_file = icon_map.get(label, "placeholder.png")
+        icon_path = os.path.join(icon_dir, icon_file)
+
         if is_number_input:
-            block = NumericInputBlock(label)
+            block = NumericInputBlock(label, icon_path=icon_path)
         elif dropdown_options:
-            block = InteractiveConfigBlock(label, dropdown_options=dropdown_options)
+            block = InteractiveConfigBlock(label, dropdown_options=dropdown_options, icon_path=icon_path)
         else:
-            block = InteractiveConfigBlock(label, is_file=is_file, is_folder=is_folder)
+            block = InteractiveConfigBlock(label, is_file=is_file, is_folder=is_folder, icon_path=icon_path)
+
 
         block.setPos(x, y)
         self.scene.addItem(block)
@@ -107,7 +129,8 @@ class PipelineCanvas(QGraphicsView):
             super().keyPressEvent(event)
         
 class InteractiveConfigBlock(QGraphicsRectItem):
-    def __init__(self, label: str, value: str = "", is_file: bool = False, is_folder: bool = False, is_number_input: bool = False, dropdown_options=None):
+    def __init__(self, label: str, value: str = "", is_file: bool = False, is_folder: bool = False, is_number_input: bool = False, dropdown_options=None, icon_path: str = None):
+        self.icon_path = icon_path
         dynamic_height = InteractiveConfigBlock.calculate_block_height(value)
         super().__init__(0, 0, 220, dynamic_height)
         self.label = label
@@ -123,11 +146,21 @@ class InteractiveConfigBlock(QGraphicsRectItem):
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsMovable)
         self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsSelectable)
 
+        if self.icon_path and os.path.exists(self.icon_path):
+            pixmap = QPixmap(self.icon_path).scaled(20, 20, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            self.icon_item = QGraphicsPixmapItem(self)
+            self.icon_item.setPixmap(pixmap)
+            self.icon_item.setOffset(5, 5)
+            label_x_offset = 30
+        else:
+            label_x_offset = 10
+        
+
         self.label_item = QGraphicsTextItem(self)
         self.label_item.setDefaultTextColor(QColor("white"))
         self.label_item.setTextWidth(self.rect().width() - 20)
         self.label_item.setPlainText(self.label)
-        self.label_item.setPos(10, 5)
+        self.label_item.setPos(label_x_offset, 5)
 
         if self.dropdown_options:
             self.dropdown = QComboBox()
@@ -243,6 +276,8 @@ class NumericInputBlock(QGraphicsRectItem):
         self.label_item.setTextWidth(200)
         self.label_item.setPlainText(self.label)
         self.label_item.setPos(10, 5)
+        
+        
 
         label_height = self.label_item.boundingRect().height()
 
