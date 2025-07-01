@@ -7,6 +7,8 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtCore import QSize
 from niaaml_gui.widgets.pipeline_canvas import PipelineCanvas
 from niaaml_gui.widgets.sidebar import ComponentSidebar
+print("File exists:", os.path.exists("niaaml_gui/widgets/pipeline_controls.py"))
+from niaaml_gui.widgets.pipeline_controls import PipelineControlsWidget
 
 class MainAppWindow(QMainWindow):
     def __init__(self):
@@ -14,6 +16,7 @@ class MainAppWindow(QMainWindow):
         self.setMinimumSize(QSize(1024, 768))
         self.setWindowTitle("NiaAML - GUI")
 
+        # Menu
         menuBar = self.menuBar()
         menuBar.setNativeMenuBar(False)
         fileMenu = menuBar.addMenu("&File")
@@ -21,26 +24,37 @@ class MainAppWindow(QMainWindow):
 
         exitAction = QAction(text="Exit", parent=self)
         exitAction.triggered.connect(QApplication.quit)
-
         fileMenu.addAction(exitAction)
-        
 
+        # Layout
         centralWidget = QWidget(self)
         mainLayout = QHBoxLayout(centralWidget)
 
         self.pipelineCanvas = PipelineCanvas()
         self.sidebar = ComponentSidebar(self.pipelineCanvas)
+        self.controls = PipelineControlsWidget()
+
+        self.controls.runClicked.connect(self.run_pipeline)
+        self.controls.resetClicked.connect(self.reset_pipeline)
 
         mainLayout.addWidget(self.sidebar)
         mainLayout.addWidget(self.pipelineCanvas)
-        centralWidget.setLayout(mainLayout)
+        mainLayout.addWidget(self.controls) 
 
+        centralWidget.setLayout(mainLayout)
         self.setCentralWidget(centralWidget)
-        
+
+        # Napake
         self.errorMessage = QMessageBox()
         self.errorMessage.setIcon(QMessageBox.Icon.Critical)
         self.errorMessage.setWindowTitle("Error")
         self.errorMessage.setStandardButtons(QMessageBox.StandardButton.Ok)
+
+    def run_pipeline(self):
+        QMessageBox.information(self, "Run", "Pipeline started!")
+
+    def reset_pipeline(self):
+        QMessageBox.information(self, "Reset", "Pipeline has been reset.")
 
 def run():
     app = QApplication(sys.argv)
