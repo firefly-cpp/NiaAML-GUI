@@ -9,13 +9,16 @@ class RunThread(QThread):
     def __init__(self, data):
         super().__init__()
         self.__data = data
-
+    
     def run(self):
         dataReader = CSVDataReader(
             src=self.__data.csvSrc,
             contains_classes=False,
             has_header=self.__data.csvHasHeader,
         )
-        pipeline = Pipeline.load(self.__data.pipelineSrc)
+        #self.__data.pipelineSrc = "C:\\Users\\Aljaž\\Desktop\\NiaAMLnewUI"
+        #pipeline = Pipeline.load(self.__data.pipelineSrc)
+        self.__data.csvHasHeader = True
+        pipeline = Pipeline.load("C:\\Users\\Aljaž\\Desktop\\NiaAMLnewUI\\niaamlGUIoutput.ppln")
         predictions = pipeline.run(dataReader.get_x())
         self.ran.emit(str(predictions))

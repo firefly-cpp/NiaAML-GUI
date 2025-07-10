@@ -46,7 +46,6 @@ class ProcessWindow(QMainWindow):
         self.setCentralWidget(centralWidget)
 
         self.__data = copy.deepcopy(data)
-
         if self.__data.isOptimization is True or self.__data.isOptimization == "v1":
             self.__progressBar.setMaximum(100)
             self.__currentEvals = 0
