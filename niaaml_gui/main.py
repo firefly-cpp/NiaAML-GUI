@@ -63,13 +63,6 @@ class MainAppWindow(QMainWindow):
         self.errorMessage.setStandardButtons(QMessageBox.StandardButton.Ok)
 
     def run_pipeline(self):
-        """
-        Prebere vrednosti iz blokov na platnu, pripravi parametre in zažene
-        optimizacijo prek `utils.pipeline_runner.run_pipeline` (»nia_run«).
-
-        • Če je v enem izmed blokov izbran CSV → podatke preberemo iz datoteke.
-        • V nasprotnem primeru pričakujemo, da sta `x` in `y` že nastavljena prek GUI-ja.
-        """
         blocks = self.pipelineCanvas.block_data
         if not blocks:
             self.errorMessage.setText("Pipeline is empty!")
@@ -171,9 +164,6 @@ class MainAppWindow(QMainWindow):
         )
 
     def reset_pipeline(self):
-        """
-        Počisti vse blocke na canvasu in resetira podatke.
-        """
         self.pipelineCanvas.scene.clear()
         self.pipelineCanvas.block_data.clear()
         self.currentPipelineData = None
