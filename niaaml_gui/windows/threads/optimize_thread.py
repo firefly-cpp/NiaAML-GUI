@@ -3,7 +3,11 @@ from niaaml.data import CSVDataReader
 from niaaml import PipelineOptimizer
 import os
 
-
+def print_pipeline_values(data):
+        print("\n Vrednosti, ki se pošiljajo v optimizacijo:\n")
+        for key, value in vars(data).items():
+                print(f"  {key} = {value}")
+        print("\n" + "-" * 60 + "\n")
 class OptimizeThread(QThread):
     optimized = pyqtSignal(object)
     progress = pyqtSignal(object)
@@ -11,21 +15,26 @@ class OptimizeThread(QThread):
     def __init__(self, data):
         super().__init__()
         self.__data = data
-
+    
     def run(self):
         dataReader = CSVDataReader(
-            src=self.__data.csvSrc, has_header=self.__data.csvHasHeader
+            src=self.__data.csvSrc,
+            has_header=self.__data.csvHasHeader
         )
+
+        fsas = self.__data.fsas.split("\n") if isinstance(self.__data.fsas, str) else self.__data.fsas
+        ftas = self.__data.ftas.split("\n") if isinstance(self.__data.ftas, str) else self.__data.ftas
+        clfs = self.__data.classifiers.split("\n") if isinstance(self.__data.classifiers, str) else self.__data.classifiers
         optimizer = PipelineOptimizer(
             data=dataReader,
-            feature_selection_algorithms=self.__data.fsas,
-            feature_transform_algorithm=self.__data.ftas,
-            classifiers=self.__data.classifiers,
+            classifiers=[c.strip() for c in clfs if c.strip()],
+            feature_selection_algorithms=[f.strip() for f in fsas if f.strip()],
+            feature_transform_algorithms=[f.strip() for f in ftas if f.strip()],
             categorical_features_encoder=self.__data.encoder,
-            imputer=self.__data.imputer,
+            imputer=self.__data.imputer,         
         )
         optimizer._PipelineOptimizer__logger = HackyLogger(self.progress.emit)
-
+        print_pipeline_values(self.__data)
         if self.__data.isOptimization is True:
             pipeline = optimizer.run(
                 self.__data.fitnessFunctionName,
@@ -43,9 +52,10 @@ class OptimizeThread(QThread):
                 self.__data.numEvals,
                 self.__data.optAlgName,
             )
-
+        
         pipeline.export(os.path.join(self.__data.outputFolder, "niaamlGUIoutput"))
         pipeline.export_text(os.path.join(self.__data.outputFolder, "niaamlGUIoutput"))
+        
         self.optimized.emit(pipeline.to_string())
 
 
@@ -61,3 +71,6 @@ class HackyLogger:
 
     def log_optimization_error(self, text):
         return
+    
+    def info(self, msg):
+        print("msg", msg)  

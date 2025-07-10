@@ -24,15 +24,15 @@ class ComponentSidebar(QWidget):
             "Feature Selection": "feature_selection.png",
             "Feature Transform": "feature_transformation.png",
             "Classifier": "classifier.png",
-            "Optimization Algorithm": "placeholder.png",
-            "Fitness Function": "placeholder.png",
+            "Optimization Algorithm": "optimization_algorithm.png",
+            "Fitness Function": "fitness.png",
             "Pipeline Output Folder": "folder.png",
-            "Optimization Algorithm (Selection)": "placeholder.png",
-            "Optimization Algorithm (Tuning)": "placeholder.png",
-            "Population Size (Components Selection)": "placeholder.png",
-            "Population Size (Parameter Tuning)": "placeholder.png",
-            "Number of Evaluations (Component Selection)": "placeholder.png",
-            "Number of Evaluations (Parameter Tuning)": "placeholder.png"
+            "Optimization Algorithm (Selection)": "optimization_algorithm.png",
+            "Optimization Algorithm (Tuning)": "decision_tree.png",
+            "Population Size (Components Selection)": "numbers.png",
+            "Population Size (Parameter Tuning)": "numbers.png",
+            "Number of Evaluations (Component Selection)": "numbers.png",
+            "Number of Evaluations (Parameter Tuning)": "numbers.png"
         }
 
         icon_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "icons")
@@ -41,7 +41,6 @@ class ComponentSidebar(QWidget):
             icon_path = os.path.join(icon_dir, icon_name)
             if not os.path.exists(icon_path):
                 icon_path = os.path.join(icon_dir, "placeholder.png")
-           # print("Looking for icon at:", icon_path)
             
             item = QListWidgetItem()
             item.setData(Qt.ItemDataRole.UserRole, label_text)
@@ -83,7 +82,6 @@ class ComponentSidebar(QWidget):
         drag = QDrag(self.listWidget)
         drag.setMimeData(mime)
         drag.exec()
-        print(f"START DRAG: {item.text()}")
     
     def handle_click(self, item):
         label = item.data(Qt.ItemDataRole.UserRole)
@@ -92,14 +90,12 @@ class ComponentSidebar(QWidget):
                 self, "Select CSV File", "", "CSV Files (*.csv);;All Files (*)"
             )
             if path:
-                print(f"Selected CSV: {path}")
                 self.canvas.add_config_block("CSV File", [], value=path)
         elif label == "Pipeline Output Folder":
             path = QFileDialog.getExistingDirectory(
                 self, "Select Output Folder", ""
             )
             if path:
-                print(f"Selected Folder: {path}")
                 self.canvas.add_config_block("Output Folder", [], value=path)
                 
     def dropEvent(self, event):
