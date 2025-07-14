@@ -85,7 +85,7 @@ class UsePipelineWidget(BaseMainWidget):
             self._parent.errorMessage.setText(err)
             self._parent.errorMessage.show()
             return
-
+        
         self._processWindow = ProcessWindow(
             self._parent,
             ProcessWindowData(

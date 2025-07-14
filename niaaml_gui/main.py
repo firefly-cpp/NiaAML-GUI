@@ -6,6 +6,7 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtCore import QSize
 from niaaml_gui.widgets.pipeline_canvas import PipelineCanvas
 from niaaml_gui.widgets.sidebar import ComponentSidebar
+from niaaml_gui.windows.process_window import ProcessWindow
 from niaaml_gui.windows.threads.optimize_thread import OptimizeThread
 from niaaml_gui.widgets.pipeline_controls import PipelineControlsWidget
 from niaaml_gui.process_window_data import ProcessWindowData
@@ -82,17 +83,13 @@ class MainAppWindow(QMainWindow):
         for block, info in blocks.items():
             label = info["label"]
 
-            # pridobi vrednosti
             if hasattr(block, "get_value"):
                 value = block.get_value()
             elif hasattr(block, "dropdown"):
                 value = block.dropdown.currentText()
             else:
                 value = info.get("path") or getattr(block, "value", None)
-
-            print(f"label={label!r}, raw='{value}'")
-
-            #preslika v class-name 
+ 
             if label == "Categorical Encoder":
                 value = encoder_map.get(value.strip(), value)
             elif label == "Missing Imputer":
@@ -117,51 +114,46 @@ class MainAppWindow(QMainWindow):
                 value = "\n".join(
                     clf_map.get(v.strip(), v) for v in value.split("\n") if v.strip()
                 )
-
-            # zapiše
             if label == "Select CSV File":
                 if hasattr(block, "checkbox"):
                     has_header = block.checkbox.isChecked()
                 data["csvSrc"] = value
             else:
                 data[label] = value
-
+                
         data["csvHasHeader"] = has_header
         self.currentPipelineData = ProcessWindowData.from_dict(data)
 
-        csv_file = self.currentPipelineData.csvSrc
-        if csv_file:
-            header = 0 if self.currentPipelineData.csvHasHeader else None
-            from niaaml.data import CSVDataReader
 
-            csv_reader = CSVDataReader(
-                src=csv_file,
-                contains_classes=True,
-                has_header=bool(header == 0),
-                ignore_columns=[],
-            )
-            x_df = csv_reader.get_x()
-            y_sr = csv_reader.get_y()
-
-        print("x_df:\n", x_df.head(), "\n\ny_sr:\n", y_sr.head())
-
-        nia_run(
-            csv_path=self.currentPipelineData.csvSrc,
-            has_header=self.currentPipelineData.csvHasHeader,
-            contains_classes=True,
-            ignore_cols=[],
-            fitness_name=self.currentPipelineData.fitnessFunctionName,
-            pop_size=int(self.currentPipelineData.popSize or 20),
-            inner_pop=int(self.currentPipelineData.popSizeInner or 20),
-            evals=int(self.currentPipelineData.numEvals or 200),
-            inner_evals=int(self.currentPipelineData.numEvalsInner or 200),
-            opt_alg=self.currentPipelineData.optAlgName or "BatAlgorithm",
-            classifiers=self.currentPipelineData.classifiers.split("\n"),
-            fs_algorithms=self.currentPipelineData.fsas.split("\n"),
-            ft_algorithms=self.currentPipelineData.ftas.split("\n"),
-            log_fn=lambda *_: None,
-            save_path=Path(self.currentPipelineData.outputFolder, "niaamlGUIoutput"),
+        
+        self._processWindow = ProcessWindow(
+            parent=self,
+            data=self.currentPipelineData,
+            pipelineSettings={                 
+                "classifiers": self.currentPipelineData.classifiers.split("\n"),
+                "fs_algorithms": self.currentPipelineData.fsas.split("\n"),
+                "ft_algorithms": self.currentPipelineData.ftas.split("\n"),
+            },
         )
+        self._processWindow.show()        
+    
+        # nia_run(
+        #     csv_path=self.currentPipelineData.csvSrc,
+        #     has_header=self.currentPipelineData.csvHasHeader,
+        #     contains_classes=True,
+        #     ignore_cols=[],
+        #     fitness_name=self.currentPipelineData.fitnessFunctionName,
+        #     pop_size=int(self.currentPipelineData.popSize or 20),
+        #     inner_pop=int(self.currentPipelineData.popSizeInner or 20),
+        #     evals=int(self.currentPipelineData.numEvals or 200),
+        #     inner_evals=int(self.currentPipelineData.numEvalsInner or 200),
+        #     opt_alg=self.currentPipelineData.optAlgName or "BatAlgorithm",
+        #     classifiers=self.currentPipelineData.classifiers.split("\n"),
+        #     fs_algorithms=self.currentPipelineData.fsas.split("\n"),
+        #     ft_algorithms=self.currentPipelineData.ftas.split("\n"),
+        #     log_fn=lambda *_: None,
+        #     save_path=Path(self.currentPipelineData.outputFolder, "niaamlGUIoutput"),
+        # )
 
     def reset_pipeline(self):
         self.pipelineCanvas.scene.clear()
