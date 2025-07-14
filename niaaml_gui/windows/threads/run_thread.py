@@ -1,6 +1,7 @@
 from PyQt6.QtCore import QThread, pyqtSignal
 from niaaml.data import CSVDataReader
 from niaaml import Pipeline
+from pathlib import Path
 
 
 class RunThread(QThread):
@@ -9,16 +10,30 @@ class RunThread(QThread):
     def __init__(self, data):
         super().__init__()
         self.__data = data
-    
+
     def run(self):
-        dataReader = CSVDataReader(
-            src=self.__data.csvSrc,
-            contains_classes=False,
-            has_header=self.__data.csvHasHeader,
-        )
-        #self.__data.pipelineSrc = "C:\\Users\\Aljaž\\Desktop\\NiaAMLnewUI"
-        #pipeline = Pipeline.load(self.__data.pipelineSrc)
-        self.__data.csvHasHeader = True
-        pipeline = Pipeline.load("C:\\Users\\Aljaž\\Desktop\\NiaAMLnewUI\\niaamlGUIoutput.ppln")
-        predictions = pipeline.run(dataReader.get_x())
-        self.ran.emit(str(predictions))
+        try:
+            dataReader = CSVDataReader(
+                src=self.__data.csvSrc,
+                contains_classes=True,
+                has_header=self.__data.csvHasHeader,
+            )
+
+            if not self.__data.pipelineSrc:
+                self.__data.pipelineSrc = (
+                    Path(self.__data.outputFolder) / "niaamlGUIoutput.ppln"
+                )
+
+            pipeline = Pipeline.load(self.__data.pipelineSrc)
+
+            x_data = dataReader.get_x()
+
+            predictions = pipeline.run(x_data)
+
+            self.ran.emit(str(predictions))
+
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+            self.ran.emit(f"ERROR: {str(e)}")

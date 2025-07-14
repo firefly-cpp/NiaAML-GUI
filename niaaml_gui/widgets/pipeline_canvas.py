@@ -1,7 +1,32 @@
 import os
-from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsRectItem, QGraphicsTextItem, QGraphicsItem, QFileDialog, QLineEdit, QGraphicsProxyWidget, QComboBox, QGraphicsPixmapItem, QCheckBox
-from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QIntValidator, QFontMetricsF, QPixmap
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QGraphicsView,
+    QGraphicsScene,
+    QGraphicsRectItem,
+    QGraphicsTextItem,
+    QGraphicsItem,
+    QFileDialog,
+    QLineEdit,
+    QGraphicsProxyWidget,
+    QComboBox,
+    QGraphicsPixmapItem,
+    QCheckBox,
+    QPushButton,
+    QMessageBox,
+    
+)
+from PyQt6.QtGui import (
+    QPainter,
+    QColor,
+    QBrush,
+    QPen,
+    QIntValidator,
+    QFontMetricsF,
+    QPixmap,
+    QIcon,
+    
+)
+from PyQt6.QtCore import Qt, QSize
 from niaaml.classifiers import ClassifierFactory
 from niaaml.preprocessing.feature_transform import FeatureTransformAlgorithmFactory
 from niaaml_gui.widgets.multi_selection_dialog import MultiSelectDialog
@@ -10,17 +35,17 @@ from niaaml.fitness import FitnessFactory
 from niaaml.preprocessing.encoding import EncoderFactory
 from niaaml.preprocessing.imputation import ImputerFactory
 from niapy.util.factory import _algorithm_options
-
+from niaaml_gui.windows.csv_editor_window import CSVEditorWindow     
 
 class PipelineCanvas(QGraphicsView):
     __niaamlFitnessFunctions = FitnessFactory().get_name_to_classname_mapping()
     __niaamlEncoders = EncoderFactory().get_name_to_classname_mapping()
     __niaamlImputers = ImputerFactory().get_name_to_classname_mapping()
-    __niapyAlgorithmsList = list(_algorithm_options().keys())   
+    __niapyAlgorithmsList = list(_algorithm_options().keys())
     __niaamlFitnessFunctionsList = list(__niaamlFitnessFunctions.keys())
     __niaamlEncodersList = list(__niaamlEncoders.keys())
     __niaamlImputersList = list(__niaamlImputers.keys())
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -31,10 +56,10 @@ class PipelineCanvas(QGraphicsView):
         self.setAcceptDrops(True)
         self.block_data = {}
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        
+
     def get_value(self):
         return self.value
-    
+
     def dragEnterEvent(self, event):
         event.acceptProposedAction()
 
@@ -55,7 +80,7 @@ class PipelineCanvas(QGraphicsView):
             "Population Size (Components Selection)",
             "Population Size (Parameter Tuning)",
             "Number of Evaluations (Component Selection)",
-            "Number of Evaluations (Parameter Tuning)"
+            "Number of Evaluations (Parameter Tuning)",
         ]
 
         dropdown_options = []
@@ -63,12 +88,17 @@ class PipelineCanvas(QGraphicsView):
             dropdown_options = self.__niaamlImputersList
         elif label == "Categorical Encoder":
             dropdown_options = self.__niaamlEncodersList
-        elif label in ["Optimization Algorithm (Selection)", "Optimization Algorithm (Tuning)"]:
+        elif label in [
+            "Optimization Algorithm (Selection)",
+            "Optimization Algorithm (Tuning)",
+        ]:
             dropdown_options = self.__niapyAlgorithmsList
         elif label == "Fitness Function":
             dropdown_options = self.__niaamlFitnessFunctionsList
 
-        icon_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "icons")
+        icon_dir = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "resources", "icons"
+        )
         icon_map = {
             "Select CSV File": "file.png",
             "Categorical Encoder": "encode.png",
@@ -84,62 +114,101 @@ class PipelineCanvas(QGraphicsView):
             "Population Size (Components Selection)": "numbers.png",
             "Population Size (Parameter Tuning)": "numbers.png",
             "Number of Evaluations (Component Selection)": "numbers.png",
-            "Number of Evaluations (Parameter Tuning)": "numbers.png"
+            "Number of Evaluations (Parameter Tuning)": "numbers.png",
         }
         icon_path = os.path.join(icon_dir, icon_map.get(label, "placeholder.png"))
 
         if is_number_input:
             block = NumericInputBlock(label, icon_path=icon_path)
         elif dropdown_options:
-            block = InteractiveConfigBlock(label, dropdown_options=dropdown_options, icon_path=icon_path)
+            block = InteractiveConfigBlock(
+                label, dropdown_options=dropdown_options, icon_path=icon_path
+            )
         else:
-            block = InteractiveConfigBlock(label, is_file=is_file, is_folder=is_folder, icon_path=icon_path)
-
+            block = InteractiveConfigBlock(
+                label, is_file=is_file, is_folder=is_folder, icon_path=icon_path
+            )
 
         block.setPos(x, y)
         self.scene.addItem(block)
-        self.block_data[block] = {'label': label, 'path': None}
-         
+        self.block_data[block] = {"label": label, "path": None}
+
     def handle_block_click(self, block):
         label = block.label
 
         if "file" in label.lower():
             path, _ = QFileDialog.getOpenFileName(self, "Select File")
             if path:
-                self.block_data[block] = {
-                    'label': label,
-                    'path': path
-                }
+                self.block_data[block] = {"label": label, "path": path}
                 block.path_display.setPlainText(os.path.basename(path))
 
         elif "folder" in label.lower():
             path = QFileDialog.getExistingDirectory(self, "Select Folder")
             if path:
-                self.block_data[block] = {
-                    'label': label,
-                    'path': path
-                }
+                self.block_data[block] = {"label": label, "path": path}
                 block.path_display.setPlainText(os.path.basename(path))
 
         else:
             pass
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Delete:
             for item in self.scene.selectedItems():
                 self.scene.removeItem(item)
         else:
             super().keyPressEvent(event)
-        
+
+    def progress_start(self, maximum: int | None = None) -> None:
+        if maximum is None:
+            self._progressBar.setMaximum(0)
+            self._progressBar.setTextVisible(False)
+        else:
+            self._progressBar.setMaximum(maximum)
+            self._progressBar.setValue(0)
+            self._progressBar.setTextVisible(True)
+
+        r = self.sceneRect()
+        self._progressBar.setGeometry(
+            int(r.x()), int(r.bottom() - 22), int(r.width()), 18
+        )
+        self._progressBar.show()
+        self.update()
+
+    def progress_set(self, value: int) -> None:
+        if self._progressBar.isVisible() and self._progressBar.maximum() != 0:
+            self._progressBar.setValue(value)
+
+    def progress_finish(self) -> None:
+        self._progressBar.hide()
+
+
 class InteractiveConfigBlock(QGraphicsRectItem):
-    __niaamlFeatureSelectionAlgorithmsMap = FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping()
-    __niaamlFeatureTransformAlgorithmsMap = FeatureTransformAlgorithmFactory().get_name_to_classname_mapping()
+    __niaamlFeatureSelectionAlgorithmsMap = (
+        FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping()
+    )
+    __niaamlFeatureTransformAlgorithmsMap = (
+        FeatureTransformAlgorithmFactory().get_name_to_classname_mapping()
+    )
     __niaamlClassifiersMap = ClassifierFactory().get_name_to_classname_mapping()
 
-    __niaamlFeatureSelectionDisplayOptions = list(__niaamlFeatureSelectionAlgorithmsMap.keys())
-    __niaamlFeatureTransformDisplayOptions = list(__niaamlFeatureTransformAlgorithmsMap.keys())
+    __niaamlFeatureSelectionDisplayOptions = list(
+        __niaamlFeatureSelectionAlgorithmsMap.keys()
+    )
+    __niaamlFeatureTransformDisplayOptions = list(
+        __niaamlFeatureTransformAlgorithmsMap.keys()
+    )
     __niaamlClassifiersDisplayOptions = list(__niaamlClassifiersMap.keys())
 
-    def __init__(self, label: str, value: str = "", is_file: bool = False, is_folder: bool = False, is_number_input: bool = False, dropdown_options=None, icon_path: str = None):
+    def __init__(
+        self,
+        label: str,
+        value: str = "",
+        is_file: bool = False,
+        is_folder: bool = False,
+        is_number_input: bool = False,
+        dropdown_options=None,
+        icon_path: str = None,
+    ):
         self.icon_path = icon_path
         self.label = label
         self.value = value
@@ -149,13 +218,12 @@ class InteractiveConfigBlock(QGraphicsRectItem):
         self.dropdown_options = dropdown_options or []
         self.selected_options = []
 
-        # Dummy values to measure
         temp_combo = QComboBox()
         temp_combo.addItems(self.dropdown_options)
         combo_width = temp_combo.sizeHint().width() if self.dropdown_options else 0
 
-        block_width = max(220, combo_width + 20)  
-        block_height = 80  
+        block_width = max(220, combo_width + 20)
+        block_height = 80
 
         super().__init__(0, 0, block_width, block_height)
 
@@ -167,7 +235,12 @@ class InteractiveConfigBlock(QGraphicsRectItem):
         # ICON
         label_x_offset = 10
         if self.icon_path and os.path.exists(self.icon_path):
-            pixmap = QPixmap(self.icon_path).scaled(20, 20, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            pixmap = QPixmap(self.icon_path).scaled(
+                20,
+                20,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
             self.icon_item = QGraphicsPixmapItem(self)
             self.icon_item.setPixmap(pixmap)
             self.icon_item.setOffset(5, 5)
@@ -207,23 +280,51 @@ class InteractiveConfigBlock(QGraphicsRectItem):
             self.value_item.setPos(10, current_y)
             current_y += 30
 
-        # CSV CHECKBOX
-        if self.is_file and self.label == "Select CSV File":
-            self.csvHasHeader = True
-            cb = QCheckBox("Has Header")
-            cb.setChecked(True)
-            proxy = QGraphicsProxyWidget(self)
-            proxy.setWidget(cb)
-            cb_width = cb.sizeHint().width()
-            proxy.setPos(block_width - cb_width - 5, 5)
+            # CSV
+            if self.is_file and self.label == "Select CSV File":
+                self.csvHasHeader = True
+                cb = QCheckBox("Has Header")
+                cb.setChecked(True)
+                proxy_cb = QGraphicsProxyWidget(self)
+                proxy_cb.setWidget(cb)
+                cb_width = cb.sizeHint().width()
+                proxy_cb.setPos(block_width - cb_width - 5, 5)
+                cb.stateChanged.connect(
+                    lambda state: setattr(self, "csvHasHeader", state == Qt.CheckState.Checked)
+                )
 
-            cb.stateChanged.connect(
-                lambda state: setattr(self, "csvHasHeader", state == Qt.CheckState.Checked)
-            )
+                icon_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "icons")
+                edit_icon_path = os.path.join(icon_dir, "placeholder.png")
+                btn = QPushButton()
+                btn.setIcon(QIcon(edit_icon_path))
+                btn.setIconSize(QSize(18, 18))
+                btn.setFixedSize(24, 24)
+                proxy_btn = QGraphicsProxyWidget(self)
+                proxy_btn.setWidget(btn)
 
-        # Update block height
-        self.setRect(0, 0, block_width, max(80, current_y + 10))
-            
+                proxy_btn.setPos(block_width - btn.width() - 5,
+                                block_height - btn.height() - 5)
+
+                btn.clicked.connect(self._open_csv_editor)
+                self._edit_btn_proxy = proxy_btn        
+
+                # Update block height
+                self.setRect(0, 0, block_width, max(80, current_y + 10))
+                if hasattr(self, "_edit_btn_proxy"):
+                    px = self.rect().width()  - self._edit_btn_proxy.widget().width()  - 5
+                    py = self.rect().height() - self._edit_btn_proxy.widget().height() - 5
+                    self._edit_btn_proxy.setPos(px, py)
+                
+    def _open_csv_editor(self):
+        if not getattr(self, "value", ""):
+            QMessageBox.warning(None, "No CSV", "Please select a CSV file first.")
+            return
+        try:
+            self._csv_editor = CSVEditorWindow(self.value)
+            self._csv_editor.show()
+        except Exception as exc:
+            QMessageBox.critical(None, "Error", str(exc))                
+
     def _add_dropdown(self, x, y):
         self.dropdown = QComboBox()
         self.dropdown.addItems(self.dropdown_options)
@@ -243,7 +344,11 @@ class InteractiveConfigBlock(QGraphicsRectItem):
         if event.button() == Qt.MouseButton.LeftButton:
             local_pos = event.pos()
             if 40 <= local_pos.y() <= 80 and not self.is_number_input:
-                if self.label in ["Feature Selection", "Feature Transform", "Classifier"]:
+                if self.label in [
+                    "Feature Selection",
+                    "Feature Transform",
+                    "Classifier",
+                ]:
                     self.getMultiSelection()
                 elif self.is_file or self.is_folder:
                     self.getPath()
@@ -254,7 +359,9 @@ class InteractiveConfigBlock(QGraphicsRectItem):
 
     def getPath(self):
         if self.is_file:
-            path, _ = QFileDialog.getOpenFileName(None, "Select File", "", "CSV Files (*.csv);;All Files (*)")
+            path, _ = QFileDialog.getOpenFileName(
+                None, "Select File", "", "CSV Files (*.csv);;All Files (*)"
+            )
             if path:
                 self.value = path
                 self.update_value_display()
@@ -265,7 +372,6 @@ class InteractiveConfigBlock(QGraphicsRectItem):
                 self.update_value_display()
 
     def getMultiSelection(self):
-        # Mape za prikaz → class name
         if self.label == "Feature Selection":
             display_options = self.__niaamlFeatureSelectionDisplayOptions
             mapping = self.__niaamlFeatureSelectionAlgorithmsMap
@@ -282,8 +388,9 @@ class InteractiveConfigBlock(QGraphicsRectItem):
         dialog = MultiSelectDialog(f"Select {self.label}(s)", display_options)
         if dialog.exec():
             selected_display_items = dialog.selected_items()
-            #  prikaz → class name
-            self.selected_options = [mapping[disp] for disp in selected_display_items if disp in mapping]
+            self.selected_options = [
+                mapping[disp] for disp in selected_display_items if disp in mapping
+            ]
             display_text = "\n".join(selected_display_items)
             self.value_item.setPlainText(display_text)
             self.value = "\n".join(self.selected_options)
@@ -291,7 +398,6 @@ class InteractiveConfigBlock(QGraphicsRectItem):
             new_height = InteractiveConfigBlock.calculate_block_height(display_text)
             self.setRect(0, 0, self.rect().width(), new_height)
             self.value_item.setTextWidth(self.rect().width() - 20)
-
 
     def update_value_display(self):
         if hasattr(self, "value_item"):
@@ -309,8 +415,20 @@ class InteractiveConfigBlock(QGraphicsRectItem):
             new_height = InteractiveConfigBlock.calculate_block_height(value_text)
             self.setRect(0, 0, self.rect().width(), new_height)
 
+    def _open_csv_editor(self):
+        if not getattr(self, "value", ""):
+            QMessageBox.warning(None, "No CSV", "Please pick a CSV file first.")
+            return
+        try:
+            self._csv_editor = CSVEditorWindow(self.value)
+            self._csv_editor.show()
+        except Exception as exc:
+            QMessageBox.critical(None, "Error", str(exc))
+
     @staticmethod
-    def calculate_block_height(text: str, width: int = 200, base_height: int = 70) -> int:
+    def calculate_block_height(
+        text: str, width: int = 200, base_height: int = 70
+    ) -> int:
         fm = QFontMetricsF(QGraphicsTextItem().font())
         line_h = fm.lineSpacing()
         lines = text.split("\n")
@@ -321,29 +439,36 @@ class InteractiveConfigBlock(QGraphicsRectItem):
         h = 30 + total * line_h + 20
         return max(base_height, int(h))
 
-            
+
 class NumericInputBlock(QGraphicsRectItem):
-    def __init__(self, label: str, icon_path: str = None):
+    def __init__(self, label: str, icon_path: str | None = None):
         super().__init__(0, 0, 220, 70)
+
         self.label = label
         self.icon_path = icon_path
-        
+
         self.setBrush(QBrush(QColor("#005f85")))
         self.setPen(QPen(QColor("white")))
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
-        
+
+        label_x_offset = 10
         if self.icon_path and os.path.exists(self.icon_path):
-            pixmap = QPixmap(self.icon_path).scaled(20, 20, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            pixmap = QPixmap(self.icon_path).scaled(
+                20, 20,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
             self.icon_item = QGraphicsPixmapItem(self)
             self.icon_item.setPixmap(pixmap)
-            self.icon_item.setOffset(5, 5)      
-        
+            self.icon_item.setOffset(5, 5)
+            label_x_offset = 30
+
         self.label_item = QGraphicsTextItem(self)
         self.label_item.setDefaultTextColor(QColor("white"))
-        self.label_item.setTextWidth(200)
+        self.label_item.setTextWidth(200 - (label_x_offset - 10))
         self.label_item.setPlainText(self.label)
-        self.label_item.setPos(10, 5)               
+        self.label_item.setPos(label_x_offset, 5)
 
         label_height = self.label_item.boundingRect().height()
 
@@ -358,5 +483,6 @@ class NumericInputBlock(QGraphicsRectItem):
         total_height = 10 + label_height + self.input_field.sizeHint().height() + 10
         self.setRect(0, 0, 221, total_height)
 
-    def get_value(self):
+    def get_value(self) -> str:
         return self.input_field.text()
+
