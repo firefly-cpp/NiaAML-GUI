@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     def log_fn(msg):
         print(msg, flush=True)
-
+        
     run_pipeline(
         csv_path=args["csv_path"],
         has_header=args["has_header"],

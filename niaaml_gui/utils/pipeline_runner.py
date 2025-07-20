@@ -6,8 +6,8 @@ from niaaml.data import CSVDataReader
 
 def run_pipeline(
     *,
-    csv_path: str,               
-    has_header: bool = True, 
+    csv_path: str,
+    has_header: bool = True,
     contains_classes: bool = True,
     ignore_cols: list[int] | None = None,
     fitness_name: str,
@@ -39,8 +39,6 @@ def run_pipeline(
             log=True
         )
 
-        log(f"▶ Začenjam optimizacijo … [metric={fitness_name}, outer={evals}, inner={inner_evals}]")
-
         pipeline = pipeline_optimizer.run(
             fitness_name,
             pop_size, inner_pop,
@@ -49,15 +47,19 @@ def run_pipeline(
         )
 
         if pipeline is None:
-            print(" pipeline_optimizer.run() returned None.")
-        else:
+            log(" pipeline_optimizer.run() returned None.")
+            return None
 
-            if save_path is not None:
-                target_ppln = Path(save_path).with_suffix(".ppln")
-                pipeline.export(target_ppln)
-                target_txt = target_ppln.with_suffix("")
-                pipeline.export_text(str(target_txt))
-                
+        if save_path:
+            save_dir = Path(save_path).resolve()
+            save_dir.mkdir(parents=True, exist_ok=True)  
+
+            target_ppln = save_dir / "NiaAML-GUI.ppln"
+            target_txt  = save_dir / "NiaAML-GUI.txt"
+
+            pipeline.export(target_ppln)
+            pipeline.export_text(str(target_txt))
+
         return pipeline
 
     except Exception:

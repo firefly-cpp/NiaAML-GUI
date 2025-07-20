@@ -1,4 +1,5 @@
 import os
+
 from PyQt6.QtWidgets import (
     QGraphicsView,
     QGraphicsScene,
@@ -13,8 +14,10 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QPushButton,
     QMessageBox,
-    
+    QGraphicsEllipseItem,
+    QGraphicsPathItem
 )
+
 from PyQt6.QtGui import (
     QPainter,
     QColor,
@@ -24,18 +27,23 @@ from PyQt6.QtGui import (
     QFontMetricsF,
     QPixmap,
     QIcon,
-    
+    QPainterPath
 )
-from PyQt6.QtCore import Qt, QSize
+
+from PyQt6.QtCore import Qt, QSize, QPointF, QRectF, pyqtSignal
+
 from niaaml.classifiers import ClassifierFactory
 from niaaml.preprocessing.feature_transform import FeatureTransformAlgorithmFactory
-from niaaml_gui.widgets.multi_selection_dialog import MultiSelectDialog
 from niaaml.preprocessing.feature_selection import FeatureSelectionAlgorithmFactory
-from niaaml.fitness import FitnessFactory
 from niaaml.preprocessing.encoding import EncoderFactory
 from niaaml.preprocessing.imputation import ImputerFactory
+from niaaml.fitness import FitnessFactory
+
 from niapy.util.factory import _algorithm_options
-from niaaml_gui.windows.csv_editor_window import CSVEditorWindow     
+
+from niaaml_gui.widgets.connection_line import ConnectionLine
+from niaaml_gui.widgets.multi_selection_dialog import MultiSelectDialog
+from niaaml_gui.windows.csv_editor_window import CSVEditorWindow
 
 class PipelineCanvas(QGraphicsView):
     __niaamlFitnessFunctions = FitnessFactory().get_name_to_classname_mapping()
@@ -45,7 +53,9 @@ class PipelineCanvas(QGraphicsView):
     __niaamlFitnessFunctionsList = list(__niaamlFitnessFunctions.keys())
     __niaamlEncodersList = list(__niaamlEncoders.keys())
     __niaamlImputersList = list(__niaamlImputers.keys())
-
+    
+    pipelineStateChanged = pyqtSignal()
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -56,7 +66,14 @@ class PipelineCanvas(QGraphicsView):
         self.setAcceptDrops(True)
         self.block_data = {}
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-
+        self.current_connection_line = None
+        self.pending_output_block = None
+        self.line_start = None
+        self._highlighted_circles = []
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
+        self.setResizeAnchor(QGraphicsView.ViewportAnchor.NoAnchor)
+        self.setSceneRect(0, 0, 5000, 5000) 
+        
     def get_value(self):
         return self.value
 
@@ -74,6 +91,50 @@ class PipelineCanvas(QGraphicsView):
             event.acceptProposedAction()
 
     def add_config_block(self, label: str, x: int = 50, y: int = 50):
+        categories = {
+            "Data": {
+                "Select CSV File", "Pipeline Output Folder"
+            },
+            "Pre-processing": {
+                "Categorical Encoder", "Missing Imputer"
+            },
+            "Feature Eng.": {
+                "Feature Selection", "Feature Transform"
+            },
+            "Modeling": {
+                "Classifier",
+                "Optimization Algorithm (Selection)",
+                "Optimization Algorithm (Tuning)"
+            },
+            "Population": {
+                "Population Size (Components Selection)", "Population Size (Parameter Tuning)"
+            },
+            "Evaluation": {
+                "Number of Evaluations (Component Selection)", "Number of Evaluations (Parameter Tuning)"
+            },
+            "Fitness": {
+                "Fitness Function"
+            }
+        }
+        def _category_for(lbl: str) -> str:
+            for cat, items in categories.items():
+                if lbl in items:
+                    return cat
+            return "Data"
+        cat = _category_for(label)
+
+        category_shapes = {
+            "Data": "rounded",                      
+            "Pre-processing": "cut-corner",        
+            "Feature Eng.": "parallelogram",             
+            "Modeling": "hexagon",                
+            "Population": "octagon",               
+            "Evaluation": "rounded",             
+            "Fitness": "ellipse"                   
+        }
+
+        shape = category_shapes.get(cat, "rect")
+
         is_file = label == "Select CSV File"
         is_folder = label == "Pipeline Output Folder"
         is_number_input = label in [
@@ -83,6 +144,7 @@ class PipelineCanvas(QGraphicsView):
             "Number of Evaluations (Parameter Tuning)",
         ]
 
+        # dropdowni
         dropdown_options = []
         if label == "Missing Imputer":
             dropdown_options = self.__niaamlImputersList
@@ -96,6 +158,7 @@ class PipelineCanvas(QGraphicsView):
         elif label == "Fitness Function":
             dropdown_options = self.__niaamlFitnessFunctionsList
 
+        # ikona
         icon_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), "resources", "icons"
         )
@@ -119,19 +182,26 @@ class PipelineCanvas(QGraphicsView):
         icon_path = os.path.join(icon_dir, icon_map.get(label, "placeholder.png"))
 
         if is_number_input:
-            block = NumericInputBlock(label, icon_path=icon_path)
+            block = NumericInputBlock(label, icon_path=icon_path, shape=shape)
         elif dropdown_options:
             block = InteractiveConfigBlock(
-                label, dropdown_options=dropdown_options, icon_path=icon_path
+                label, dropdown_options=dropdown_options, icon_path=icon_path, shape=shape
             )
         else:
             block = InteractiveConfigBlock(
-                label, is_file=is_file, is_folder=is_folder, icon_path=icon_path
+                label, is_file=is_file, is_folder=is_folder,
+                icon_path=icon_path, shape=shape
             )
 
         block.setPos(x, y)
         self.scene.addItem(block)
         self.block_data[block] = {"label": label, "path": None}
+        self.pipelineStateChanged.emit()
+        
+        if hasattr(block, "input_field"):
+            block.input_field.textChanged.connect(self.pipelineStateChanged.emit)
+        elif hasattr(block, "dropdown"):
+            block.dropdown.currentTextChanged.connect(self.pipelineStateChanged.emit)
 
     def handle_block_click(self, block):
         label = block.label
@@ -141,12 +211,14 @@ class PipelineCanvas(QGraphicsView):
             if path:
                 self.block_data[block] = {"label": label, "path": path}
                 block.path_display.setPlainText(os.path.basename(path))
+            self.pipelineStateChanged.emit()
 
         elif "folder" in label.lower():
             path = QFileDialog.getExistingDirectory(self, "Select Folder")
             if path:
                 self.block_data[block] = {"label": label, "path": path}
                 block.path_display.setPlainText(os.path.basename(path))
+            self.pipelineStateChanged.emit()
 
         else:
             pass
@@ -154,9 +226,20 @@ class PipelineCanvas(QGraphicsView):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Delete:
             for item in self.scene.selectedItems():
+                if isinstance(item, ConnectionLine):
+                    if hasattr(item.source_block, "connections"):
+                        if item in item.source_block.connections:
+                            item.source_block.connections.remove(item)
+                    if hasattr(item.target_block, "connections"):
+                        if item in item.target_block.connections:
+                            item.target_block.connections.remove(item)
                 self.scene.removeItem(item)
+            self.pipelineStateChanged.emit()
+            
         else:
             super().keyPressEvent(event)
+            self.pipelineStateChanged.emit()
+
 
     def progress_start(self, maximum: int | None = None) -> None:
         if maximum is None:
@@ -180,9 +263,122 @@ class PipelineCanvas(QGraphicsView):
 
     def progress_finish(self) -> None:
         self._progressBar.hide()
+        
+    def mousePressEvent(self, event):
+        view_pos  = event.pos()               
+        scene_pos = self.mapToScene(view_pos) 
+        item = self.itemAt(view_pos)           
+
+        if isinstance(item, QGraphicsEllipseItem):
+            item = item.parentItem()
+
+        if isinstance(item, (InteractiveConfigBlock, NumericInputBlock)):
+            local = item.mapFromScene(scene_pos)
+            if item.output_circle.contains(local):
+                self.pending_output_block = item
+
+                self.line_preview = QGraphicsPathItem()
+                self.line_preview.setZValue(99)
+                self.line_preview.setPen(QPen(QColor("black"), 2, Qt.PenStyle.DashLine))
+                self.line_preview.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIgnoresTransformations)
+                self.line_preview.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemDoesntPropagateOpacityToChildren)
+
+                self.scene.addItem(self.line_preview)
+                self.line_start = item.output_point()
+
+                self._highlight_connection_targets(item)
+                return  
+
+        super().mousePressEvent(event)
 
 
-class InteractiveConfigBlock(QGraphicsRectItem):
+    def mouseMoveEvent(self, event):
+        if getattr(self, "line_preview", None):
+            end = self.mapToScene(event.pos())
+            path = QPainterPath()
+            path.moveTo(self.line_start)
+            dx = (end.x() - self.line_start.x()) * 0.5
+            cp1 = QPointF(self.line_start.x() + dx, self.line_start.y())
+            cp2 = QPointF(end.x() - dx, end.y())
+            path.cubicTo(cp1, cp2, end)
+            self.line_preview.setPath(path)
+        else:
+            super().mouseMoveEvent(event)
+
+
+    def mouseReleaseEvent(self, event):
+        if getattr(self, "line_preview", None):
+            self.scene.removeItem(self.line_preview)
+            self.line_preview = None
+
+        self._clear_connection_highlights()
+
+        if self.pending_output_block:
+            view_pos = event.pos()
+            scene_pos = self.mapToScene(view_pos)
+            item = self.scene.itemAt(scene_pos, self.transform())
+            if isinstance(item, QGraphicsEllipseItem):
+                item = item.parentItem()
+
+            if isinstance(item, (InteractiveConfigBlock, NumericInputBlock))  and item is not self.pending_output_block:
+                local = item.mapFromScene(scene_pos)
+                if item.input_circle.contains(local):
+                    if self._is_valid_connection(self.pending_output_block, item):
+                        connection = ConnectionLine(self.pending_output_block, item)
+                        self.scene.addItem(connection)
+                        self.pending_output_block.add_connection(connection)
+                        item.add_connection(connection)
+
+            self.pending_output_block = None
+            self.pipelineStateChanged.emit()
+
+        else:
+            super().mouseReleaseEvent(event)
+            self.pipelineStateChanged.emit()
+
+            
+    def _is_valid_connection(self, source, target) -> bool:
+        if source is target:
+            return False
+        source_label = getattr(source, "label", "").lower()
+        target_label = getattr(target, "label", "").lower()
+        if "csv" in source_label and not any(k in target_label for k in ["encoder", "imputer"]):
+            return False
+        for conn in source.connections:
+            if conn.target_block is target:
+                return False
+        return True
+    
+    def _highlight_connection_targets(self, source_block):
+        for item in self.scene.items():
+            if item is source_block:
+                continue
+
+            if isinstance(item, (InteractiveConfigBlock, NumericInputBlock)):
+                is_valid = self._is_valid_connection(source_block, item)
+                color = QColor("green") if is_valid else QColor("red")
+                item.input_circle.setBrush(QBrush(color))
+                self._highlighted_circles.append(item.input_circle)
+
+
+    def _clear_connection_highlights(self):
+        for circle in self._highlighted_circles:
+            circle.setBrush(QBrush(QColor("white")))
+        self._highlighted_circles.clear()        
+        
+    def is_pipeline_ready(self) -> bool:
+        for block, info in self.block_data.items():
+            if hasattr(block, "get_value"):
+                value = block.get_value()
+                if not value or (isinstance(value, str) and not value.strip()):
+                    return False
+            elif info.get("path") is None:
+                return False
+        return True
+
+
+
+class InteractiveConfigBlock(QGraphicsPathItem):
     __niaamlFeatureSelectionAlgorithmsMap = (
         FeatureSelectionAlgorithmFactory().get_name_to_classname_mapping()
     )
@@ -191,298 +387,470 @@ class InteractiveConfigBlock(QGraphicsRectItem):
     )
     __niaamlClassifiersMap = ClassifierFactory().get_name_to_classname_mapping()
 
-    __niaamlFeatureSelectionDisplayOptions = list(
-        __niaamlFeatureSelectionAlgorithmsMap.keys()
-    )
-    __niaamlFeatureTransformDisplayOptions = list(
-        __niaamlFeatureTransformAlgorithmsMap.keys()
-    )
-    __niaamlClassifiersDisplayOptions = list(__niaamlClassifiersMap.keys())
+    __niaamlFeatureSelectionDisplayOptions = list(__niaamlFeatureSelectionAlgorithmsMap)
+    __niaamlFeatureTransformDisplayOptions = list(__niaamlFeatureTransformAlgorithmsMap)
+    __niaamlClassifiersDisplayOptions      = list(__niaamlClassifiersMap)
 
     def __init__(
         self,
         label: str,
+        *,
+        shape: str = "rect",
         value: str = "",
         is_file: bool = False,
         is_folder: bool = False,
         is_number_input: bool = False,
         dropdown_options=None,
-        icon_path: str = None,
+        icon_path: str | None = None,
     ):
-        self.icon_path = icon_path
-        self.label = label
-        self.value = value
-        self.is_file = is_file
-        self.is_folder = is_folder
-        self.is_number_input = is_number_input
+        super().__init__()
+
+        self.shape            = shape.lower()
+        self.icon_path        = icon_path
+        self.label            = label
+        self.value            = value
+        self.is_file          = is_file
+        self.is_folder        = is_folder
+        self.is_number_input  = is_number_input
         self.dropdown_options = dropdown_options or []
-        self.selected_options = []
+        self.selected_options : list[str] = []
+        self.connections      : list      = []
+        
+        tmp = QComboBox(); tmp.addItems(self.dropdown_options)
+        combo_w   = tmp.sizeHint().width() if self.dropdown_options else 0
+        self.w    = max(220, combo_w + 20)
+        self.h    = 80
 
-        temp_combo = QComboBox()
-        temp_combo.addItems(self.dropdown_options)
-        combo_width = temp_combo.sizeHint().width() if self.dropdown_options else 0
-
-        block_width = max(220, combo_width + 20)
-        block_height = 80
-
-        super().__init__(0, 0, block_width, block_height)
-
+        self._set_shape_path()
         self.setBrush(QBrush(QColor("#005f85")))
-        self.setPen(QPen(QColor("white")))
-        self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsMovable)
-        self.setFlag(QGraphicsRectItem.GraphicsItemFlag.ItemIsSelectable)
+        self.setPen  (QPen  (QColor("white")))
+        self.setFlags(
+            QGraphicsPathItem.GraphicsItemFlag.ItemIsMovable            |
+            QGraphicsPathItem.GraphicsItemFlag.ItemIsSelectable         |
+            QGraphicsPathItem.GraphicsItemFlag.ItemSendsGeometryChanges
+        )
 
-        # ICON
-        label_x_offset = 10
+        lbl_x = 10
         if self.icon_path and os.path.exists(self.icon_path):
-            pixmap = QPixmap(self.icon_path).scaled(
-                20,
-                20,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation,
+            pm = QPixmap(self.icon_path).scaled(
+                20, 20, Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
             )
-            self.icon_item = QGraphicsPixmapItem(self)
-            self.icon_item.setPixmap(pixmap)
+            self.icon_item = QGraphicsPixmapItem(pm, self)
             self.icon_item.setOffset(5, 5)
-            label_x_offset = 30
+            lbl_x = 30
 
-        # LABEL
         self.label_item = QGraphicsTextItem(self)
         self.label_item.setDefaultTextColor(QColor("white"))
         self.label_item.setPlainText(self.label)
-        self.label_item.setPos(label_x_offset, 5)
+        self.label_item.setPos(lbl_x, 5)
 
-        current_y = 30
-
-        # DROPDOWN
+        y = 30
         if self.dropdown_options:
-            self.dropdown = QComboBox()
-            self.dropdown.addItems(self.dropdown_options)
-            self.proxy = QGraphicsProxyWidget(self)
-            self.proxy.setWidget(self.dropdown)
-            self.proxy.setPos(10, current_y)
-            current_y += self.dropdown.sizeHint().height() + 10
+            dd = QComboBox(); dd.addItems(self.dropdown_options)
+            pr = QGraphicsProxyWidget(self); pr.setWidget(dd); pr.setPos(10, y)
+            self.dropdown = dd
+            y += dd.sizeHint().height() + 10
 
         elif self.is_number_input:
-            self.input_field = QLineEdit()
-            self.input_field.setValidator(QIntValidator(0, 999999))
-            self.input_field.setFixedWidth(100)
-            self.input_field.setText(self.value)
-            self.proxy = QGraphicsProxyWidget(self)
-            self.proxy.setWidget(self.input_field)
-            self.proxy.setPos(10, current_y)
-            current_y += self.input_field.sizeHint().height() + 10
+            le = QLineEdit(); le.setValidator(QIntValidator(0, 999999)); le.setFixedWidth(100)
+            pr = QGraphicsProxyWidget(self); pr.setWidget(le); pr.setPos(10, y)
+            self.input_field = le
+            y += le.sizeHint().height() + 10
 
         else:
-            self.value_item = QGraphicsTextItem(self)
+            self.value_item = QGraphicsTextItem("Click to select…", self)
             self.value_item.setDefaultTextColor(QColor("white"))
-            self.value_item.setPlainText("Click to select...")
-            self.value_item.setPos(10, current_y)
-            current_y += 30
+            self.value_item.setTextWidth(self.w - 20)  
+            self.value_item.setZValue(1)
 
-            # CSV
+
+            text_rect = self.value_item.boundingRect()
+            text_x = 10
+            text_y = y
+            self.value_item.setPos(text_x, text_y)
+
+            self.click_button = QPushButton("")
+            self.click_button.setFlat(True)
+            self.click_button.setStyleSheet("background-color: transparent; border: none;")
+            self.click_button.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.click_button.setFixedSize(int(text_rect.width()), int(text_rect.height()))
+
+            self.click_button.clicked.connect(lambda: self._handle_click_action())
+
+            self.click_proxy = QGraphicsProxyWidget(self)
+            self.click_proxy.setWidget(self.click_button)
+            self.click_proxy.setPos(text_x, text_y)
+
             if self.is_file and self.label == "Select CSV File":
-                self.csvHasHeader = True
-                cb = QCheckBox("Has Header")
-                cb.setChecked(True)
-                proxy_cb = QGraphicsProxyWidget(self)
-                proxy_cb.setWidget(cb)
-                cb_width = cb.sizeHint().width()
-                proxy_cb.setPos(block_width - cb_width - 5, 5)
-                cb.stateChanged.connect(
-                    lambda state: setattr(self, "csvHasHeader", state == Qt.CheckState.Checked)
-                )
+                self._add_csv_helpers()
 
-                icon_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "icons")
-                edit_icon_path = os.path.join(icon_dir, "placeholder.png")
-                btn = QPushButton()
-                btn.setIcon(QIcon(edit_icon_path))
-                btn.setIconSize(QSize(18, 18))
-                btn.setFixedSize(24, 24)
-                proxy_btn = QGraphicsProxyWidget(self)
-                proxy_btn.setWidget(btn)
+        self.input_circle  = QGraphicsEllipseItem(self)
+        self.output_circle = QGraphicsEllipseItem(self)
+        for circ in (self.input_circle, self.output_circle):
+            circ.setBrush(QBrush(QColor("white")))
+            circ.setZValue(1)
+        self._reposition_io()
+        self._layout_contents()
 
-                proxy_btn.setPos(block_width - btn.width() - 5,
-                                block_height - btn.height() - 5)
+    def _handle_click_action(self):
+        if self.dropdown_options:
+            return 
+        elif self.label in ["Feature Selection", "Feature Transform", "Classifier"]:
+            self.getMultiSelection()
+        elif self.is_file or self.is_folder:
+            self.getPath()
+        
+    def _set_shape_path(self):
+        """Definira QPainterPath glede na izbrano obliko."""
+        p = QPainterPath()
+        w, h = self.w, self.h
 
-                btn.clicked.connect(self._open_csv_editor)
-                self._edit_btn_proxy = proxy_btn        
+        if self.shape == "rounded":
+            p.addRoundedRect(0, 0, w, h, 10, 10)
 
-                # Update block height
-                self.setRect(0, 0, block_width, max(80, current_y + 10))
-                if hasattr(self, "_edit_btn_proxy"):
-                    px = self.rect().width()  - self._edit_btn_proxy.widget().width()  - 5
-                    py = self.rect().height() - self._edit_btn_proxy.widget().height() - 5
-                    self._edit_btn_proxy.setPos(px, py)
-                
-    def _open_csv_editor(self):
-        if not getattr(self, "value", ""):
-            QMessageBox.warning(None, "No CSV", "Please select a CSV file first.")
-            return
-        try:
-            self._csv_editor = CSVEditorWindow(self.value)
-            self._csv_editor.show()
-        except Exception as exc:
-            QMessageBox.critical(None, "Error", str(exc))                
+        elif self.shape == "diamond":
+            p.moveTo(w / 2, 0)
+            p.lineTo(w, h / 2)
+            p.lineTo(w / 2, h)
+            p.lineTo(0, h / 2)
+            p.closeSubpath()
 
-    def _add_dropdown(self, x, y):
-        self.dropdown = QComboBox()
-        self.dropdown.addItems(self.dropdown_options)
-        proxy = QGraphicsProxyWidget(self)
-        proxy.setWidget(self.dropdown)
-        proxy.setPos(x, y)
+        elif self.shape == "octagon":
+            r = 10
+            p.moveTo(r, 0)
+            p.lineTo(w - r, 0)
+            p.lineTo(w, r)
+            p.lineTo(w, h - r)
+            p.lineTo(w - r, h)
+            p.lineTo(r, h)
+            p.lineTo(0, h - r)
+            p.lineTo(0, r)
+            p.closeSubpath()
 
-    def _add_number_input(self, x, y):
-        le = QLineEdit()
-        le.setValidator(QIntValidator(0, 999999))
-        le.setFixedWidth(100)
-        proxy = QGraphicsProxyWidget(self)
-        proxy.setWidget(le)
-        proxy.setPos(x, y)
+        elif self.shape == "hexagon":
+            r = 15
+            p.moveTo(r, 0)
+            p.lineTo(w - r, 0)
+            p.lineTo(w, h / 2)
+            p.lineTo(w - r, h)
+            p.lineTo(r, h)
+            p.lineTo(0, h / 2)
+            p.closeSubpath()
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            local_pos = event.pos()
-            if 40 <= local_pos.y() <= 80 and not self.is_number_input:
-                if self.label in [
-                    "Feature Selection",
-                    "Feature Transform",
-                    "Classifier",
-                ]:
-                    self.getMultiSelection()
-                elif self.is_file or self.is_folder:
-                    self.getPath()
-            else:
-                super().mousePressEvent(event)
-        else:
-            super().mousePressEvent(event)
+        elif self.shape == "cut-corner":
+            r = 10
+            p.moveTo(r, 0)
+            p.lineTo(w - r, 0)
+            p.lineTo(w, r)
+            p.lineTo(w, h - r)
+            p.lineTo(w - r, h)
+            p.lineTo(r, h)
+            p.lineTo(0, h - r)
+            p.lineTo(0, r)
+            p.closeSubpath()
 
-    def getPath(self):
-        if self.is_file:
-            path, _ = QFileDialog.getOpenFileName(
-                None, "Select File", "", "CSV Files (*.csv);;All Files (*)"
-            )
-            if path:
-                self.value = path
-                self.update_value_display()
-        elif self.is_folder:
-            folder = QFileDialog.getExistingDirectory(None, "Select Folder")
-            if folder:
-                self.value = folder
-                self.update_value_display()
+        elif self.shape == "notched":
+            notch = 10
+            p.moveTo(notch, 0)
+            p.lineTo(w - notch, 0)
+            p.lineTo(w, notch)
+            p.lineTo(w, h - notch)
+            p.lineTo(w - notch, h)
+            p.lineTo(notch, h)
+            p.lineTo(0, h - notch)
+            p.lineTo(0, notch)
+            p.closeSubpath()
+        elif self.shape == "notched":
+            notch = 10
+            p.moveTo(notch, 0)
+            p.lineTo(w - notch, 0)
+            p.lineTo(w, notch)
+            p.lineTo(w, h - notch)
+            p.lineTo(w - notch, h)
+            p.lineTo(notch, h)
+            p.lineTo(0, h - notch)
+            p.lineTo(0, notch)
+            p.closeSubpath()
+        elif self.shape == "parallelogram":
+            slant = 20
+            p.moveTo(0, 0)
+            p.lineTo(self.w - slant, 0)
+            p.lineTo(self.w, self.h)
+            p.lineTo(slant, self.h)
+            p.closeSubpath()
+        else:  
+            p.addRect(0, 0, w, h)
 
-    def getMultiSelection(self):
-        if self.label == "Feature Selection":
-            display_options = self.__niaamlFeatureSelectionDisplayOptions
-            mapping = self.__niaamlFeatureSelectionAlgorithmsMap
-        elif self.label == "Feature Transform":
-            display_options = self.__niaamlFeatureTransformDisplayOptions
-            mapping = self.__niaamlFeatureTransformAlgorithmsMap
-        elif self.label == "Classifier":
-            display_options = self.__niaamlClassifiersDisplayOptions
-            mapping = self.__niaamlClassifiersMap
-        else:
-            display_options = []
-            mapping = {}
+        self.setPath(p)
 
-        dialog = MultiSelectDialog(f"Select {self.label}(s)", display_options)
-        if dialog.exec():
-            selected_display_items = dialog.selected_items()
-            self.selected_options = [
-                mapping[disp] for disp in selected_display_items if disp in mapping
-            ]
-            display_text = "\n".join(selected_display_items)
-            self.value_item.setPlainText(display_text)
-            self.value = "\n".join(self.selected_options)
+    def _reposition_io(self):
+        self.input_circle .setRect(-6,        self.h/2 - 6, 12, 12)
+        self.output_circle.setRect(self.w - 6, self.h/2 - 6, 12, 12)
 
-            new_height = InteractiveConfigBlock.calculate_block_height(display_text)
-            self.setRect(0, 0, self.rect().width(), new_height)
-            self.value_item.setTextWidth(self.rect().width() - 20)
+    def _add_csv_helpers(self):
+        self.csvHasHeader = True
+        cb = QCheckBox("Header"); cb.setChecked(True)
+        p_cb = QGraphicsProxyWidget(self); p_cb.setWidget(cb)
+        p_cb.setPos(self.w - cb.sizeHint().width() - 5, 5)
+        cb.stateChanged.connect(
+            lambda s: setattr(self, "csvHasHeader", s == Qt.CheckState.Checked)
+        )
+        
+        icon_dir  = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "icons")
+        edit_icon = os.path.join(icon_dir, "placeholder.png")
+        btn = QPushButton(); btn.setIcon(QIcon(edit_icon)); btn.setIconSize(QSize(18, 18))
+        btn.setFixedSize(24, 24)
+        p_btn = QGraphicsProxyWidget(self); p_btn.setWidget(btn)
+        p_btn.setPos(self.w - 24 - 5, self.h - 24 - 5)
+        btn.clicked.connect(self._open_csv_editor)
+        self._edit_btn_proxy = p_btn
 
-    def update_value_display(self):
-        if hasattr(self, "value_item"):
-            if self.selected_options:
-                value_text = "\n".join(self.selected_options)
-            elif self.value:
-                value_text = self.value
-            else:
-                value_text = "Click to select..."
-
-            self.value_item.setPlainText(value_text)
-            self.value_item.setTextWidth(self.rect().width() - 20)
-
-            # Recalc and update block height
-            new_height = InteractiveConfigBlock.calculate_block_height(value_text)
-            self.setRect(0, 0, self.rect().width(), new_height)
+    def input_point (self) -> QPointF: return self.mapToScene(0,      self.h/2)
+    def output_point(self) -> QPointF: return self.mapToScene(self.w, self.h/2)
 
     def _open_csv_editor(self):
         if not getattr(self, "value", ""):
             QMessageBox.warning(None, "No CSV", "Please pick a CSV file first.")
             return
-        try:
-            self._csv_editor = CSVEditorWindow(self.value)
-            self._csv_editor.show()
-        except Exception as exc:
-            QMessageBox.critical(None, "Error", str(exc))
+        CSVEditorWindow(self.value).show()
+
+    def getPath(self):
+        dlg = QFileDialog
+        if self.is_file:
+            path, _ = dlg.getOpenFileName(None, "Select File", "", "CSV Files (*.csv);;All Files (*)")
+        else:
+            path = dlg.getExistingDirectory(None, "Select Folder")
+        if path:
+            self.value = path
+            self.update_value_display()
+
+    def getMultiSelection(self):
+        if self.label == "Feature Selection":
+            disp, mp = self.__niaamlFeatureSelectionDisplayOptions, self.__niaamlFeatureSelectionAlgorithmsMap
+        elif self.label == "Feature Transform":
+            disp, mp = self.__niaamlFeatureTransformDisplayOptions, self.__niaamlFeatureTransformAlgorithmsMap
+        elif self.label == "Classifier":
+            disp, mp = self.__niaamlClassifiersDisplayOptions     , self.__niaamlClassifiersMap
+        else:
+            disp, mp = [], {}
+
+        dlg = MultiSelectDialog(f"Select {self.label}(s)", disp)
+        if dlg.exec():
+            chosen = dlg.selected_items()
+            self.selected_options = [mp[d] for d in chosen if d in mp]
+            txt = "\n".join(chosen)
+            self.value_item.setPlainText(txt)
+            self.value = "\n".join(self.selected_options)
+            self._adjust_height(txt)
+
+    def update_value_display(self):
+        if hasattr(self, "value_item"):
+            if self.selected_options: txt = "\n".join(self.selected_options)
+            elif self.value:          txt = self.value
+            else:                     txt = "Click to select…"
+            self.value_item.setPlainText(txt)
+            self._adjust_height(txt)
+            
+        if hasattr(self, "click_button"):
+            text_rect = self.value_item.boundingRect()
+            text_x = (self.w - text_rect.width()) / 2
+            text_y = self.value_item.pos().y()
+            self.click_button.setFixedSize(int(text_rect.width()), int(text_rect.height()))
+            if hasattr(self, "click_proxy"):
+                self.click_proxy.setPos(text_x, text_y)
+
+    def _adjust_height(self, text: str):
+        new_h = self.calculate_block_height(text)
+        if new_h != self.h:
+            dh = new_h - self.h
+            self.h = new_h
+            self._set_shape_path()
+            self._reposition_io()
+            if hasattr(self, "click_proxy"):
+                p = self.click_proxy.pos()
+                self.click_proxy.setPos(p.x(), p.y() + dh)
+
+
+    def itemChange(self, ch, val):
+        if ch == QGraphicsPathItem.GraphicsItemChange.ItemPositionChange:
+            for c in self.connections:
+                c.update_path()
+        return super().itemChange(ch, val)
 
     @staticmethod
-    def calculate_block_height(
-        text: str, width: int = 200, base_height: int = 70
-    ) -> int:
+    def calculate_block_height(text: str, width: int = 200, base: int = 70) -> int:
         fm = QFontMetricsF(QGraphicsTextItem().font())
         line_h = fm.lineSpacing()
-        lines = text.split("\n")
-        total = 0
-        for ln in lines:
-            w = fm.horizontalAdvance(ln)
-            total += max(1, int(w / width) + 1)
-        h = 30 + total * line_h + 20
-        return max(base_height, int(h))
+        lines  = text.split("\n")
+        tot = sum(max(1, int(fm.horizontalAdvance(ln) / width) + 1) for ln in lines)
+        return max(base, int(30 + tot * line_h + 20))
+
+    def add_connection(self, conn):
+        if conn not in self.connections:
+            self.connections.append(conn)
+    
+    def _layout_contents(self):
+        margin = 10
+        icon_size = 20
+        spacing = 5
+        label_x = margin
+
+        if hasattr(self, "icon_item"):
+            self.icon_item.setOffset(label_x, margin)
+            label_x += icon_size + spacing
+
+        text_width = self.label_item.boundingRect().width()
+        self.label_item.setPos((self.w - text_width) / 2, margin)
+
+        if hasattr(self, "input_field"):
+            proxy = QGraphicsProxyWidget(self)
+            proxy.setWidget(self.input_field)
+            field_y = margin + self.label_item.boundingRect().height() + spacing
+            proxy.setPos((self.w - self.input_field.width()) / 2, field_y)
+
+    def boundingRect(self):
+        return QRectF(0, 0, self.w, self.h)
+            
 
 
-class NumericInputBlock(QGraphicsRectItem):
-    def __init__(self, label: str, icon_path: str | None = None):
-        super().__init__(0, 0, 220, 70)
-
+class NumericInputBlock(QGraphicsPathItem):
+    def __init__(
+        self,
+        label: str,
+        *,
+        shape: str = "rect",
+        icon_path: str | None = None
+    ):
+        super().__init__()
         self.label = label
         self.icon_path = icon_path
+        self.shape = shape.lower()
+        self.connections = []
 
-        self.setBrush(QBrush(QColor("#005f85")))
-        self.setPen(QPen(QColor("white")))
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
+        self._w = 220
+        self._h = 70
 
-        label_x_offset = 10
+        label_x = 10
         if self.icon_path and os.path.exists(self.icon_path):
-            pixmap = QPixmap(self.icon_path).scaled(
+            pm = QPixmap(self.icon_path).scaled(
                 20, 20,
                 Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.SmoothTransformation,
+                Qt.TransformationMode.SmoothTransformation
             )
-            self.icon_item = QGraphicsPixmapItem(self)
-            self.icon_item.setPixmap(pixmap)
+            self.icon_item = QGraphicsPixmapItem(pm, self)
             self.icon_item.setOffset(5, 5)
-            label_x_offset = 30
+            label_x = 30
 
         self.label_item = QGraphicsTextItem(self)
         self.label_item.setDefaultTextColor(QColor("white"))
-        self.label_item.setTextWidth(200 - (label_x_offset - 10))
+        self.label_item.setTextWidth(self._w - label_x - 10)
         self.label_item.setPlainText(self.label)
-        self.label_item.setPos(label_x_offset, 5)
 
-        label_height = self.label_item.boundingRect().height()
-
+        edit_y = 10 + self.label_item.boundingRect().height()
         self.input_field = QLineEdit()
         self.input_field.setValidator(QIntValidator(0, 999999))
         self.input_field.setFixedWidth(100)
 
-        self.proxy = QGraphicsProxyWidget(self)
-        self.proxy.setWidget(self.input_field)
-        self.proxy.setPos(10, 10 + label_height)
+        proxy = QGraphicsProxyWidget(self)
+        proxy.setWidget(self.input_field)
+        proxy.setPos(10, edit_y)
 
-        total_height = 10 + label_height + self.input_field.sizeHint().height() + 10
-        self.setRect(0, 0, 221, total_height)
+        self._h = edit_y + self.input_field.sizeHint().height() + 10
+
+        self._set_shape_path()
+
+        self.input_circle = QGraphicsEllipseItem(-6, self._h / 2 - 6, 12, 12, self)
+        self.output_circle = QGraphicsEllipseItem(self._w - 6, self._h / 2 - 6, 12, 12, self)
+        for circ in (self.input_circle, self.output_circle):
+            circ.setBrush(QBrush(QColor("white")))
+            circ.setZValue(1)
+
+        self.setBrush(QBrush(QColor("#005f85")))
+        self.setPen(QPen(QColor("white")))
+        self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsMovable)
+        self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemIsSelectable)
+        self.setFlag(QGraphicsPathItem.GraphicsItemFlag.ItemSendsGeometryChanges)
+
+        self._layout_contents()
+
+    def _set_shape_path(self):
+        p = QPainterPath()
+        if self.shape == "rounded":
+            p.addRoundedRect(0, 0, self._w, self._h, 12, 12)
+        elif self.shape == "ellipse":
+            p.addEllipse(0, 0, self._w, self._h)
+        elif self.shape == "diamond":
+            p.moveTo(self._w / 2, 0)
+            p.lineTo(self._w, self._h / 2)
+            p.lineTo(self._w / 2, self._h)
+            p.lineTo(0, self._h / 2)
+            p.closeSubpath()
+        elif self.shape == "octagon":
+            r = 12
+            p.moveTo(r, 0)
+            p.lineTo(self._w - r, 0)
+            p.lineTo(self._w, r)
+            p.lineTo(self._w, self._h - r)
+            p.lineTo(self._w - r, self._h)
+            p.lineTo(r, self._h)
+            p.lineTo(0, self._h - r)
+            p.lineTo(0, r)
+            p.closeSubpath()
+        elif self.shape == "hexagon":
+            p.moveTo(self._w * 0.25, 0)
+            p.lineTo(self._w * 0.75, 0)
+            p.lineTo(self._w, self._h * 0.5)
+            p.lineTo(self._w * 0.75, self._h)
+            p.lineTo(self._w * 0.25, self._h)
+            p.lineTo(0, self._h * 0.5)
+            p.closeSubpath()
+        elif self.shape == "trapezoid":
+            p.moveTo(self._w * 0.2, 0)
+            p.lineTo(self._w * 0.8, 0)
+            p.lineTo(self._w, self._h)
+            p.lineTo(0, self._h)
+            p.closeSubpath()
+        else:
+            p.addRect(0, 0, self._w, self._h)
+        self.setPath(p)
+
+    def input_point(self) -> QPointF:
+        return self.mapToScene(self.input_circle.boundingRect().center())
+
+    def output_point(self) -> QPointF:
+        return self.mapToScene(self.output_circle.boundingRect().center())
+
+    def add_connection(self, conn):
+        if conn not in self.connections:
+            self.connections.append(conn)
+
+    def itemChange(self, change, value):
+        if change == QGraphicsPathItem.GraphicsItemChange.ItemPositionChange:
+            for conn in self.connections:
+                conn.update_path()
+        return super().itemChange(change, value)
 
     def get_value(self) -> str:
         return self.input_field.text()
 
+    def _layout_contents(self):
+        margin = 10
+        icon_size = 20
+        spacing = 5
+        label_x = margin
+
+        if hasattr(self, "icon_item"):
+            self.icon_item.setOffset(label_x, margin)
+            label_x += icon_size + spacing
+
+        if hasattr(self, "label_item"):
+            if hasattr(self, "icon_item"):
+                self.label_item.setPos(label_x, margin)
+            else:
+                text_width = self.label_item.boundingRect().width()
+                self.label_item.setPos((self._w - text_width) / 2, margin)
+
+
+    def boundingRect(self):
+        return QRectF(0, 0, self._w, self._h)
