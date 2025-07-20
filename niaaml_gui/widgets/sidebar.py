@@ -49,7 +49,6 @@ class ComponentSidebar(QWidget):
             },
             "Modeling": {
                 "Classifier": "classifier.png",
-                "Optimization Algorithm": "optimization_algorithm.png",
                 "Optimization Algorithm (Selection)": "optimization_algorithm.png",
                 "Optimization Algorithm (Tuning)": "decision_tree.png",
             },
@@ -65,7 +64,7 @@ class ComponentSidebar(QWidget):
                 "Population Size (Parameter Tuning)": "numbers.png",
             },
         }
-
+        
         icon_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "icons")
 
         for cat_name, items in categories.items():

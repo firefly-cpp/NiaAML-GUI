@@ -49,6 +49,8 @@ class MainAppWindow(QMainWindow):
 
         self.controls.runClicked.connect(self.run_pipeline)
         self.controls.resetClicked.connect(self.reset_pipeline)
+        self.pipelineCanvas.pipelineStateChanged.connect(self.validate_pipeline_ready)
+        self._update_run_button_state()  
 
         mainLayout.addWidget(self.sidebar)
         mainLayout.addWidget(self.pipelineCanvas)
@@ -162,7 +164,27 @@ class MainAppWindow(QMainWindow):
 
     def show_optimization_result(self, result_text):
         QMessageBox.information(self, "Pipeline Finished", result_text)
+        
+    def validate_pipeline_ready(self):
+        all_valid = True
+        for block, info in self.pipelineCanvas.block_data.items():
+            label = info.get("label", "")
+            if hasattr(block, "get_value"):
+                value = block.get_value()
+            elif hasattr(block, "dropdown"):
+                value = block.dropdown.currentText()
+            else:
+                value = info.get("path") or getattr(block, "value", None)
 
+            if not value or (isinstance(value, str) and not value.strip()):
+                all_valid = False
+                break
+
+        self.controls.setRunEnabled(all_valid)
+
+    def _update_run_button_state(self):
+        ready = self.pipelineCanvas.is_pipeline_ready()
+        self.controls.run_button.setEnabled(ready)
 
 def run():
     app = QApplication(sys.argv)
@@ -171,7 +193,11 @@ def run():
     style_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "styles.qss")
     if os.path.exists(style_path):
         with open(style_path, "r") as f:
-            app.setStyleSheet(f.read())
+            style_sheet = f.read()
+            app.setStyleSheet(style_sheet)
+            print("styles.qss loaded and applied.")
+    else:
+        print("styles.qss NOT found!")
 
     mainWin = MainAppWindow()
     mainWin.showMaximized()

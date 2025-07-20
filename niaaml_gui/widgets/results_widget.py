@@ -28,7 +28,7 @@ class ResultsWidget(QWidget):
         table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)        
         total_width = sum([table.columnWidth(i) for i in range(table.columnCount())])
         total_width += table.verticalHeader().width()
-        total_width += 2 * table.frameWidth() #edges
+        total_width += 2 * table.frameWidth()
         table.setMaximumWidth(total_width)
         table.setStyleSheet("""
             QTableWidget {

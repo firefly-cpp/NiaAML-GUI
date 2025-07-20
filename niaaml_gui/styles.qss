@@ -124,3 +124,9 @@ QWidget#graphCanvas {
     background-color: #005f85;
     color:rgb(133, 0, 93)
 }
+
+QPushButton:disabled {
+    background-color: #444;
+    color: #aaa;
+    border: 1px solid #222;
+}
