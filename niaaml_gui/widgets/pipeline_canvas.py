@@ -366,6 +366,9 @@ class PipelineCanvas(QGraphicsView):
         self._highlighted_circles.clear()        
         
     def is_pipeline_ready(self) -> bool:
+        if not self.block_data:
+            return False
+
         for block, info in self.block_data.items():
             if hasattr(block, "get_value"):
                 value = block.get_value()
@@ -374,6 +377,7 @@ class PipelineCanvas(QGraphicsView):
             elif info.get("path") is None:
                 return False
         return True
+
 
 
 
