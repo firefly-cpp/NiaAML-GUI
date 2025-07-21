@@ -31,8 +31,6 @@ def test_run_button_emits_signal(controls, qtbot):
         controls.setRunEnabled(True)
         qtbot.mouseClick(controls.run_button, Qt.MouseButton.LeftButton)
 
-
-# 🔧 FIX: full_widget mora živeti dovolj dolgo (vrnemo container, hranimo canvas v atributih)
 @pytest.fixture
 def full_widget(qtbot: QtBot):
     canvas = PipelineCanvas()
@@ -49,8 +47,7 @@ def full_widget(qtbot: QtBot):
     def update_run_button_state():
         ready = canvas.is_pipeline_ready()
         controls.run_button.setEnabled(ready)
-
-    # Shranimo reference, da ne bodo pobrisane
+        
     container.canvas = canvas
     container.controls = controls
     container.update_fn = update_run_button_state
@@ -65,7 +62,7 @@ def test_update_run_button_state_false_when_incomplete(full_widget):
     controls = full_widget.controls
     update_fn = full_widget.update_fn
 
-    canvas.add_config_block("Select CSV File")  # še brez path
+    canvas.add_config_block("Select CSV File")
     update_fn()
 
     assert controls.run_button.isEnabled() is False
