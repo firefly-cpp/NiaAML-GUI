@@ -52,4 +52,6 @@ jobs:
     - name: Install dependencies
       run: poetry install
     - name: Run tests with Xvfb (for PyQt support)
-      run: xvfb-run -a poetry run pytest
+      run: |
+        export QT_QPA_PLATFORM=offscreen
+        xvfb-run -a poetry run pytest
