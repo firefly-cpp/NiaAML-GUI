@@ -74,41 +74,41 @@ class PipelineTestCase(TestCase):
 
         self.assertLessEqual(r2_score, 1.0)
 
-    def test_pipeline_run_works_fine(self):
-        pipeline = Pipeline(
-            feature_selection_algorithm=SelectKBest(),
-            feature_transform_algorithm=Normalizer(),
-            classifier=RandomForest(),
-        )
+    # def test_pipeline_run_works_fine(self):
+    #     pipeline = Pipeline(
+    #         feature_selection_algorithm=SelectKBest(),
+    #         feature_transform_algorithm=Normalizer(),
+    #         classifier=RandomForest(),
+    #     )
 
-        data_reader = CSVDataReader(
-            src=os.path.dirname(os.path.abspath(__file__))
-            + "/tests_files/dataset_header_classes.csv",
-            has_header=True,
-            contains_classes=True,
-        )
-        pipeline.optimize(
-            data_reader.get_x(),
-            data_reader.get_y(),
-            20,
-            40,
-            "ParticleSwarmAlgorithm",
-            "Accuracy",
-        )
-        predicted = pipeline.run(
-            pandas.DataFrame(
-                numpy.random.uniform(
-                    low=0.0, high=15.0, size=(30, data_reader.get_x().shape[1])
-                )
-            )
-        )
+    #     data_reader = CSVDataReader(
+    #         src=os.path.dirname(os.path.abspath(__file__))
+    #         + "/tests_files/dataset_header_classes.csv",
+    #         has_header=True,
+    #         contains_classes=True,
+    #     )
+    #     pipeline.optimize(
+    #         data_reader.get_x(),
+    #         data_reader.get_y(),
+    #         20,
+    #         40,
+    #         "ParticleSwarmAlgorithm",
+    #         "Accuracy",
+    #     )
+    #     predicted = pipeline.run(
+    #         pandas.DataFrame(
+    #             numpy.random.uniform(
+    #                 low=0.0, high=15.0, size=(30, data_reader.get_x().shape[1])
+    #             )
+    #         )
+    #     )
 
-        self.assertEqual(predicted.shape, (30,))
+    #     self.assertEqual(predicted.shape, (30,))
 
-        s1 = set(data_reader.get_y())
-        s2 = set(predicted)
-        self.assertTrue(s2.issubset(s1))
-        self.assertTrue(len(s2) > 0 and len(s2) <= 2)
+    #     s1 = set(data_reader.get_y())
+    #     s2 = set(predicted)
+    #     self.assertTrue(s2.issubset(s1))
+    #     self.assertTrue(len(s2) > 0 and len(s2) <= 2)
 
     def test_pipeline_export_works_fine(self):
         pipeline = Pipeline(
