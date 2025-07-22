@@ -51,5 +51,5 @@ jobs:
       run: timeout 10s poetry run pip --version || rm -rf .venv
     - name: Install dependencies
       run: poetry install
-    - name: Run tests
-      run: poetry run pytest
+    - name: Run tests with Xvfb (for PyQt support)
+      run: xvfb-run -a poetry run pytest
