@@ -16,7 +16,6 @@ QtAwesome = "^1.2.3"
 niaaml = "^2.1.2"
 scikit-learn = "^1.6.1"
 pyqt6 = "^6.6.0"
-pytest-qt = "^4.5.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
