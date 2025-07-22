@@ -403,6 +403,20 @@ files = [
 ]
 
 [[package]]
+name = "emoji"
+version = "2.14.1"
+description = "Emoji for Python"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "emoji-2.14.1-py3-none-any.whl", hash = "sha256:35a8a486c1460addb1499e3bf7929d3889b2e2841a57401903699fef595e942b"},
+    {file = "emoji-2.14.1.tar.gz", hash = "sha256:f8c50043d79a2c1410ebfae833ae1868d5941a67a6cd4d18377e2eb0bd79346b"},
+]
+
+[package.extras]
+dev = ["coverage", "pytest (>=7.4.4)"]
+
+[[package]]
 name = "et-xmlfile"
 version = "2.0.0"
 description = "An implementation of lxml.xmlfile for the standard library"
@@ -1197,6 +1211,24 @@ files = [
 diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
+name = "pyqt-feedback-flow"
+version = "0.3.5"
+description = "Show feedback in toast-like notifications"
+optional = false
+python-versions = "<4.0,>=3.10"
+files = [
+    {file = "pyqt_feedback_flow-0.3.5-py3-none-any.whl", hash = "sha256:5a1c7408fb3e3e63f08e0e12b9ce0fea79e66d77e2df3c947ede1a4528218ffa"},
+    {file = "pyqt_feedback_flow-0.3.5.tar.gz", hash = "sha256:5fa2b5246f9b3010a154b4cd80346f0149afae9cb594b4f5f5acab9e0333a8f8"},
+]
+
+[package.dependencies]
+emoji = ">=2.6.0,<3.0.0"
+PyQt6 = ">=6.4.2,<7.0.0"
+
+[package.extras]
+docs = ["Sphinx (>=5.0,<6.0)", "sphinx-rtd-theme (>=1.0.0,<2.0.0)"]
+
+[[package]]
 name = "pyqt6"
 version = "6.9.1"
 description = "Python bindings for the Qt cross platform application toolkit"
@@ -1743,4 +1775,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "3dee49db19f42a6477259afc1c8d763001737a8e36ad55a1c228df968accfea9"
+content-hash = "53d7b24e79e950faa411d7c27f332d041b63694abea7e5294c17b466b692ce14"
