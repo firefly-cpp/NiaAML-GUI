@@ -38,6 +38,8 @@ jobs:
       run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
     - name: Configure poetry
       run: poetry config virtualenvs.in-project true
+    - name: Install system dependencies (for PyQt6)
+      run: sudo apt-get update && sudo apt-get install -y libegl1
     - name: Set up cache
       uses: actions/cache@v3
       id: cache
@@ -49,5 +51,7 @@ jobs:
       run: timeout 10s poetry run pip --version || rm -rf .venv
     - name: Install dependencies
       run: poetry install
-    - name: Run tests
-      run: poetry run pytest
+    - name: Run tests with Xvfb (for PyQt support)
+      run: |
+        export QT_QPA_PLATFORM=offscreen
+        xvfb-run -a poetry run pytest

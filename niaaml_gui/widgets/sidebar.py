@@ -72,7 +72,7 @@ class ComponentSidebar(QWidget):
             lst.setSpacing(2)
             lst.setDragEnabled(True)
             lst.mouseMoveEvent = self._wrapped_start_drag
-            lst.itemClicked.connect(self.handle_click)
+            #lst.itemClicked.connect(self.handle_click)
 
             for label, icon_file in items.items():
                 icon_path = os.path.join(icon_dir, icon_file)

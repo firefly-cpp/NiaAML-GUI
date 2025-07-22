@@ -238,7 +238,6 @@ class PipelineCanvas(QGraphicsView):
             
         else:
             super().keyPressEvent(event)
-            self.pipelineStateChanged.emit()
 
 
     def progress_start(self, maximum: int | None = None) -> None:
@@ -367,6 +366,9 @@ class PipelineCanvas(QGraphicsView):
         self._highlighted_circles.clear()        
         
     def is_pipeline_ready(self) -> bool:
+        if not self.block_data:
+            return False
+
         for block, info in self.block_data.items():
             if hasattr(block, "get_value"):
                 value = block.get_value()
@@ -375,6 +377,7 @@ class PipelineCanvas(QGraphicsView):
             elif info.get("path") is None:
                 return False
         return True
+
 
 
 
@@ -402,9 +405,11 @@ class InteractiveConfigBlock(QGraphicsPathItem):
         is_number_input: bool = False,
         dropdown_options=None,
         icon_path: str | None = None,
+        is_sidebar=True,
+        readonly=False  
     ):
         super().__init__()
-
+        self.readonly = readonly  
         self.shape            = shape.lower()
         self.icon_path        = icon_path
         self.label            = label
@@ -494,6 +499,9 @@ class InteractiveConfigBlock(QGraphicsPathItem):
         self._layout_contents()
 
     def _handle_click_action(self):
+        
+        if self.readonly:
+            return
         if self.dropdown_options:
             return 
         elif self.label in ["Feature Selection", "Feature Transform", "Classifier"]:
@@ -613,7 +621,8 @@ class InteractiveConfigBlock(QGraphicsPathItem):
         if not getattr(self, "value", ""):
             QMessageBox.warning(None, "No CSV", "Please pick a CSV file first.")
             return
-        CSVEditorWindow(self.value).show()
+        self.csv_editor_window = CSVEditorWindow(self.value)
+        self.csv_editor_window.show()
 
     def getPath(self):
         dlg = QFileDialog

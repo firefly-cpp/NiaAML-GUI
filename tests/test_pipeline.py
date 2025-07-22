@@ -87,6 +87,7 @@ class PipelineTestCase(TestCase):
             has_header=True,
             contains_classes=True,
         )
+
         pipeline.optimize(
             data_reader.get_x(),
             data_reader.get_y(),
@@ -95,20 +96,16 @@ class PipelineTestCase(TestCase):
             "ParticleSwarmAlgorithm",
             "Accuracy",
         )
-        predicted = pipeline.run(
-            pandas.DataFrame(
-                numpy.random.uniform(
-                    low=0.0, high=15.0, size=(30, data_reader.get_x().shape[1])
-                )
-            )
-        )
+
+        test_data = data_reader.get_x().iloc[:30]
+        predicted = pipeline.run(test_data)
 
         self.assertEqual(predicted.shape, (30,))
-
         s1 = set(data_reader.get_y())
         s2 = set(predicted)
         self.assertTrue(s2.issubset(s1))
         self.assertTrue(len(s2) > 0 and len(s2) <= 2)
+
 
     def test_pipeline_export_works_fine(self):
         pipeline = Pipeline(
