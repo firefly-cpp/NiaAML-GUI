@@ -39,7 +39,7 @@ class PipelineRunnerThread(QThread):
             }
 
             process = subprocess.Popen(
-                ["python", "niaaml_gui/utils/run_pipeline_subprocess.py"],
+                ["python", "-m", "niaaml_gui.utils.run_pipeline_subprocess"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
