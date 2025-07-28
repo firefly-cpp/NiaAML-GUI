@@ -1,4 +1,3 @@
-from pathlib import Path
 import subprocess
 import json
 from PyQt6.QtCore import QThread, pyqtSignal
@@ -40,13 +39,11 @@ class PipelineRunnerThread(QThread):
             }
 
             process = subprocess.Popen(
-                
                 ["python", "-m", "niaaml_gui.utils.run_pipeline_subprocess"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
-                text=True,
-                cwd=str(Path(__file__).resolve().parent.parent.parent)
+                text=True
             )
 
             json.dump(args, process.stdin)
