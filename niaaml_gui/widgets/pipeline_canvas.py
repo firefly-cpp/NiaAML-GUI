@@ -339,14 +339,60 @@ class PipelineCanvas(QGraphicsView):
     def _is_valid_connection(self, source, target) -> bool:
         if source is target:
             return False
-        source_label = getattr(source, "label", "").lower()
-        target_label = getattr(target, "label", "").lower()
-        if "csv" in source_label and not any(k in target_label for k in ["encoder", "imputer"]):
+
+        source_label = getattr(source, "label", "").strip().lower()
+        target_label = getattr(target, "label", "").strip().lower()
+
+        categories = [
+            ("data", {"select csv file", "pipeline output folder"}),
+            ("pre-processing", {"categorical encoder", "missing imputer"}),
+            ("feature eng.", {"feature selection", "feature transform"}),
+            ("modeling", {"classifier", "optimization algorithm (selection)", "optimization algorithm (tuning)"}),
+            ("population", {"population size (components selection)", "population size (parameter tuning)"}),
+            ("evaluation", {"number of evaluations (component selection)", "number of evaluations (parameter tuning)"}),
+            ("fitness", {"fitness function"})
+        ]
+
+        def find_category(label: str) -> str | None:
+            for cat, items in categories:
+                if label in items:
+                    return cat
+            return None
+
+        source_cat = find_category(source_label)
+        target_cat = find_category(target_label)
+
+        if not source_cat or not target_cat:
             return False
-        for conn in source.connections:
-            if conn.target_block is target:
-                return False
-        return True
+
+        # Block "Pipeline Output Folder" can only be target, not source
+        if source_label == "pipeline output folder":
+            return False
+        # Block "Select CSV File" can only be source, not target
+        if target_label == "select csv file":
+            return False
+
+        # Allow connection from Fitness → Output Folder explicitly
+        if source_cat == "fitness" and target_label == "pipeline output folder":
+            return True
+
+        # Allow connections within the same category
+        if source_cat == target_cat:
+            return True
+
+        # Allow connection to next category
+        cat_order = [cat for cat, _ in categories]
+        try:
+            source_idx = cat_order.index(source_cat)
+            target_idx = cat_order.index(target_cat)
+            if target_idx == source_idx + 1:
+                return True
+        except ValueError:
+            return False
+
+        return False
+
+
     
     def _highlight_connection_targets(self, source_block):
         for item in self.scene.items():
