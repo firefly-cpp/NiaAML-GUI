@@ -31,7 +31,6 @@ class ConnectionLine(QGraphicsPathItem):
         self.update_path()
 
     def mousePressEvent(self, event):
-        """Ob kliku samo izberi povezavo – ne izbriši."""
         self.setSelected(True)
         super().mousePressEvent(event)
 

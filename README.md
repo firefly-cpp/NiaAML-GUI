@@ -41,10 +41,10 @@
     <a href="#-cite-us">📄 Cite us</a>
 </p>
 
-This is a basic graphical user interface intended for users of the [NiaAML](https://github.com/firefly-cpp/NiaAML) Python package.
+A graphical user interface for building and running machine learning pipelines using the [NiaAML](https://github.com/firefly-cpp/NiaAML) framework. This GUI now supports **block-based pipeline composition**, drag-and-drop components, visual connections, and CSV editing.
 
 * **Free software:** MIT license
-* **Python versions:** 3.9.x, 3.10.x, 3.11.x, 3.12.x
+* **Python versions:** 3.10.x, 3.11.x, 3.12.x, 3.13.x
 
 ## 📦 Installation
 
@@ -73,14 +73,14 @@ $ dnf install NiaAML-GUI
 To install `NiaAML-GUI` on Alpine Linux, enable Community repository and use:
 
 ```sh
-$ apk add niaaml-gui
+$ apk add niaaml-gui 
 ```
 
 ## 🚀 Usage
 
 NiaAML GUI application allows you to use the main features of the [NiaAML](https://github.com/firefly-cpp/NiaAML) framework. There are two views in the application. In the first one, you can prepare an environment for a pipeline optimization process. The purpose of the second one is to allow you to use an existing pipeline from a file. **The application currently supports data input in the form of CSV files.**
 
-### Optimization View
+### Pipeline Canvas View
 
 Below is a screenshot of the first view with labeled components and you can find a description for each component under the screenshot.
 
@@ -88,21 +88,25 @@ Below is a screenshot of the first view with labeled components and you can find
 
 | Component | Description |
 |:----------|:------------|
-| 1         | Tabbed view for choosing components for the optimization. Clicked components get transferred to their corresponding brackets (labels **5**, **6** and **7**). |
-| 2         | Input CSV dataset's file selection widget. After the dataset has been selected, you can also view and edit it using the edit button next to the `Select file` button. **Also make sure you check the `CSV has header` checkbox in case the selected CSV file has a header row.** Below you can see a screenshot of the CSV file's editing window. <p align="center"><img src=".github/gui3.png" alt="NiaAML GUI Edit Dataset View" title="NiaAML GUI Edit Dataset View"/></p> |
-| 3         | Dropdown widget for categorical features' encoder selection. It will be ignored if the dataset contains no categorical features. |
-| 4         | Dropdown widget for missing data imputer selection. It will be ignored if the dataset contains no missing values. |
-| 5         | List of selected feature selection algorithms (optional). |
-| 6         | List of selected feature transform algorithms (optional). |
-| 7         | List of selected classifiers. |
-| 8         | Dropdown widget for the selection of components' selection optimization algorithm. |
-| 9         | Dropdown widget for the selection of hyperparameters' tuning optimization algorithm. Defaults to **8** if none is selected. |
-| 10        | Population size for the components' selection process. |
-| 11        | Population size for the hyperparameters' tuning process. |
-| 12        | Number of evaluations during the components' selection process. |
-| 13        | Number of evaluations during the hyperparameters' tuning process. |
-| 14        | Dropdown widget for the selection of a fitness function to use during the pipeline evaluation step. |
-| 15        | Destination of the optimization's result (pipeline and text file). |
+| 1         | Tabbed view for choosing components to be added to the canvas. Components can be dragged and dropped onto the canvas to visually build the pipeline. |
+| 2         | The canvas area where blocks (components) are placed and connected. Users can construct the pipeline visually by drawing arrows between valid components. |
+| 3         | "Select CSV File" block. Input dataset selection. Includes a file browser, CSV header checkbox, and an edit button to view/modify the CSV content. <br> <p align="center"><img src=".github/gui3.png" alt="NiaAML GUI Edit Dataset View" title="NiaAML GUI Edit Dataset View"/></p> |
+| 4         | "Categorical Encoder" block. Allows selection of encoding method for categorical features. Dropdown populated dynamically. |
+| 5         | "Missing Imputer" block. Allows selection of imputation method to handle missing values. |
+| 6         | "Feature Selection" block. Multi-selection dialog allows the user to choose one or more feature selection algorithms. |
+| 7         | "Feature Transform" block. Multi-selection dialog allows choosing one or more feature transformation algorithms. |
+| 8         | "Classifier" block. Multi-selection dialog for selecting one or more classification models. |
+| 9         | "Optimization Algorithm (Selection)" block. Dropdown for choosing the optimization algorithm used in component selection. |
+| 10        | "Optimization Algorithm (Tuning)" block. Dropdown for choosing the algorithm used for hyperparameter tuning. |
+| 11        | "Population Size (Components Selection)" block. Numeric input for specifying the population size during component selection. |
+| 12        | "Population Size (Parameter Tuning)" block. Numeric input for specifying the population size for hyperparameter tuning. |
+| 13        | "Number of Evaluations (Component Selection)" block. Sets the number of allowed evaluations during selection. |
+| 14        | "Number of Evaluations (Parameter Tuning)" block. Sets the number of evaluations for hyperparameter tuning. |
+| 15        | "Fitness Function" block. Dropdown for selecting the fitness function used during evaluation of each candidate pipeline. |
+| 16        | "Pipeline Output Folder" block. Defines the target folder where output files (pipeline, logs, results) are saved. |
+| 17        | Arrow connections between blocks. Only valid connections are allowed. When drawing, green/red highlights show whether the target is acceptable. |
+| 18        | Validation system. Before running optimization, the system checks whether all required components are present and properly configured. |
+
 
 #### Optimization
 
@@ -111,24 +115,9 @@ Below you can see screenshots of views during and after the optimization has fin
 <p align="center"><img src=".github/gui2.png" alt="NiaAML GUI Optimization Running" title="NiaAML GUI Optimization Running"/></p>
 <p align="center"><img src=".github/gui4.png" alt="NiaAML GUI Optimization Finished" title="NiaAML GUI Optimization Finished"/></p>
 
-### Usage View
-
-Below is a screenshot of the second view with labeled components and you can find a description for each component under the screenshot.
-
-<p align="center"><img src=".github/gui5.png" alt="NiaAML GUI Second View" title="NiaAML GUI Second View"/></p>
-
-| Component | Description |
-|:----------|:------------|
-| 1         | Pipeline file selection widget. |
-| 2         | Input CSV file selection widget. The file should contain the same headers (if any) as the dataset in the optimization process and there should be no classes (expected results) present. After the dataset has been selected, you can also view and edit it using the edit button next to the `Select file` button. **Also make sure you check the** `CSV has header` **checkbox in case the selected CSV file has a header row.** |
-
-#### Run
-
-You get a similar output than in the optimization process, but this time there is an array of predicted values present.
-
 ## 📓 Example
 
-Let's say we want to find an optimal classification pipeline for the [Ecoli dataset](https://archive.ics.uci.edu/ml/datasets/ecoli) [[1]](#1). You can see the optimization setup in the screenshot below.
+Let's say we want to find an optimal classification pipeline for the Example dataset. You can see the optimization setup in the screenshot below.
 
 <p align="center"><img src=".github/gui6.png" alt="NiaAML GUI Optimization Setup" title="NiaAML GUI Optimization Setup"/></p>
 
@@ -143,10 +132,6 @@ There are also 2 new files in the selected destination directory.
 Now we can use the exported pipeline file for further classification on the unseen data.
 
 <p align="center"><img src=".github/gui9.png" alt="NiaAML GUI Run Pipeline" title="NiaAML GUI Run Pipeline"/></p>
-
-The result for 5 individuals is shown on the screenshot below.
-
-<p align="center"><img src=".github/gui10.png" alt="NiaAML GUI Run Pipeline Result" title="NiaAML GUI Run Pipeline Result"/></p>
 
 ## 📝 References
 
