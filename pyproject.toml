@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "NiaAML-GUI"
-version = "0.3.3"
+version = "0.4.1"
 description = "GUI for NiaAML Python package"
 license = "MIT"
 authors = ["Luka Pečnik <lukapecnik96@gmail.com>"]
@@ -10,7 +10,7 @@ repository = "https://github.com/firefly-cpp/NiaAML-GUI"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<3.14"
 niapy = "^2.5.2"
 QtAwesome = "^1.2.3"
 niaaml = "^2.1.2"
