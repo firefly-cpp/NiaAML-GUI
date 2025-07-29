@@ -365,22 +365,19 @@ class PipelineCanvas(QGraphicsView):
         if not source_cat or not target_cat:
             return False
 
-        # Block "Pipeline Output Folder" can only be target, not source
+        
         if source_label == "pipeline output folder":
             return False
-        # Block "Select CSV File" can only be source, not target
+        
         if target_label == "select csv file":
             return False
-
-        # Allow connection from Fitness → Output Folder explicitly
+    
         if source_cat == "fitness" and target_label == "pipeline output folder":
             return True
-
-        # Allow connections within the same category
+     
         if source_cat == target_cat:
             return True
 
-        # Allow connection to next category
         cat_order = [cat for cat, _ in categories]
         try:
             source_idx = cat_order.index(source_cat)
@@ -652,7 +649,7 @@ class InteractiveConfigBlock(QGraphicsPathItem):
         )
         
         icon_dir  = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "icons")
-        edit_icon = os.path.join(icon_dir, "placeholder.png")
+        edit_icon = os.path.join(icon_dir, "edit.png")
         btn = QPushButton(); btn.setIcon(QIcon(edit_icon)); btn.setIconSize(QSize(18, 18))
         btn.setFixedSize(24, 24)
         p_btn = QGraphicsProxyWidget(self); p_btn.setWidget(btn)
