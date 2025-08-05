@@ -66,6 +66,27 @@ class MainAppWindow(QMainWindow):
         self.errorMessage.setStandardButtons(QMessageBox.StandardButton.Ok)
 
     def run_pipeline(self):
+        
+        invalid_blocks = []
+
+        for block, info in self.pipelineCanvas.block_data.items():
+            label = info.get("label", "")
+            if hasattr(block, "get_value"):
+                value = block.get_value()
+            elif hasattr(block, "dropdown"):
+                value = block.dropdown.currentText()
+            else:
+                value = info.get("path") or getattr(block, "value", None)
+
+            if not value or (isinstance(value, str) and not value.strip()):
+                invalid_blocks.append(label)
+
+        if invalid_blocks:
+            msg = "Pipeline isn't set up correctly. Missing components:\n\n" + "\n".join(f"- {label}" for label in invalid_blocks)
+            self.errorMessage.setText(msg)
+            self.errorMessage.exec()
+            return
+        
         blocks = self.pipelineCanvas.block_data
         if not blocks:
             self.errorMessage.setText("Pipeline is empty!")
@@ -175,7 +196,7 @@ class MainAppWindow(QMainWindow):
                 value = block.dropdown.currentText()
             else:
                 value = info.get("path") or getattr(block, "value", None)
-
+                            
             if not value or (isinstance(value, str) and not value.strip()):
                 all_valid = False
                 break

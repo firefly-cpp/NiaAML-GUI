@@ -20,8 +20,6 @@ def test_pipeline_ready_false_when_empty(canvas):
     canvas.block_data.clear()
     canvas.scene.clear()
 
-    print("Block data keys:", canvas.block_data.keys())
-
     assert len(canvas.block_data) == 0
     assert not canvas.is_pipeline_ready()
 
